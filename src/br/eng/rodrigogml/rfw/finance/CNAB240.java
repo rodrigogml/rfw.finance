@@ -182,7 +182,7 @@ public class CNAB240 {
    * Número seqüencial adotado e controlado pelo responsável pela geração do arquivo para ordenar a disposição dos arquivos encaminhados. <br>
    * Evoluir um número seqüencial a cada header de arquivo.
    */
-  private String numeroSequencial;
+  private String numeroSequencialArquivo;
 
   /**
    * G022 Para Uso Reservado da Empresa<br>
@@ -253,7 +253,7 @@ public class CNAB240 {
     PreProcess.requiredNonNullCritical(contaNumero, "Você deve definir o atributo Número da Conta para gerar o arquivo CNAB240.");
     PreProcess.requiredNonNullCritical(nomeEmpresa, "Você deve definir o atributo Nome da Empresa para gerar o arquivo CNAB240.");
     PreProcess.requiredNonNullCritical(nomeBanco, "Você deve definir o atributo Nome do Banco para gerar o arquivo CNAB240.");
-    PreProcess.requiredNonNullCritical(numeroSequencial, "Você deve definir o atributo Número Sequencial para gerar o arquivo CNAB240.");
+    PreProcess.requiredNonNullCritical(numeroSequencialArquivo, "Você deve definir o atributo Número Sequencial para gerar o arquivo CNAB240.");
 
     buff.append(writeFileHeader());
 
@@ -268,7 +268,7 @@ public class CNAB240 {
 
     buff.append(writeFileTrailer(totalRegistros, totalSegmentos));
 
-    return buff.toString();
+    return RUString.removeNonUTF8(RUString.removeAccents(buff.toString())); // Remove acentos e caracteres não UTF8 para aumentar a compatibilidade do arquivo
   }
 
   private StringBuilder writeFileTrailer(long totalRegistros, long totalSegmentos) throws RFWCriticalException {
@@ -289,7 +289,7 @@ public class CNAB240 {
 
     // Valida o tamanho do Registro
     if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Trailer para o Arquivo de Lote. A linha não ficou com 240 caracteres.");
-    buff.append(buff).append("\r\n"); // Adiciona quebra de linha ao final
+    buff.append("\r\n"); // Adiciona quebra de linha ao final
     return buff;
   }
 
@@ -335,11 +335,11 @@ public class CNAB240 {
     // +Hora de Geração do Arquivo 152-157 6 - Num
     buff.append(RFW.getDateTime().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss")));
     // Número Seqüencial do Arquivo 158 163 6 - Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", numeroSequencial, 6));
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", numeroSequencialArquivo, 6));
     // No da Versão do Layout do Arquivo 164-166 3 - Num '103'
     // +Densidade de Gravação do Arquivo 167-171 5 - Num
     // +Para Uso Reservado do Banco 172-191 20 - Alfa
-    buff.append("10300000 ");
+    buff.append("10300000                    ");
     // Para Uso Reservado da Empresa 192 211 20 - Alfa
     buff.append(RUString.completeOrTruncateUntilLengthRight(" ", reservadoEmpresa, 20)); // Para Uso Reservado da Empresa (192-211)
     // Uso Exclusivo FEBRABAN / CNAB 212 240 29 - Alfa Brancos
@@ -347,7 +347,7 @@ public class CNAB240 {
 
     // Valida o tamanho do Registro
     if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Header para o Arquivo de Lote. A linha não ficou com 240 caracteres.");
-    buff.append(buff).append("\r\n"); // Adiciona quebra de linha ao final
+    buff.append("\r\n"); // Adiciona quebra de linha ao final
     return buff;
   }
 
@@ -391,6 +391,7 @@ public class CNAB240 {
     PreProcess.requiredNonNegative(PreProcess.processBigDecimalToZeroIfNullOrNegative(valorMoraMulta), "Deve ser informado null ou um valor válido e positivo para Valor da Mora + Multa.");
     PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
     PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
+    PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
     RUDocValidation.validateCPFOrCNPJ(beneficiarioNumeroInscricao);
 
     barCode = barCode.replaceAll("[^\\d]+", "");
@@ -431,15 +432,15 @@ public class CNAB240 {
     // Data do Vencimento (Nominal) 92 99 8 - Num
     buff.append(RUDateTime.formatToddMMyyyy(dataVencimento));
     // Valor do Título (Nominal) 100 114 13 2 Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", valorTitulo.movePointRight(2).abs().toPlainString(), 15));
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorTitulo).movePointRight(2).abs().toPlainString(), 15));
     // Valor do Desconto + Abatimento 115 129 13 2 Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", valorDesconto.movePointRight(2).abs().toPlainString(), 15));
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorDesconto).movePointRight(2).abs().toPlainString(), 15));
     // Valor da Mora + Multa 130 144 13 2 Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", valorMoraMulta.movePointRight(2).abs().toPlainString(), 15));
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorMoraMulta).movePointRight(2).abs().toPlainString(), 15));
     // Data do Pagamento 145 152 8 - Num
     buff.append(RUDateTime.formatToddMMyyyy(dataPagamento));
     // Valor do Pagamento 153 167 13 2 Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", valorPagamento.movePointRight(2).abs().toPlainString(), 15));
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // Quantidade da Moeda 168 182 10 5 Num [NÃO UTILIZADO NESSE TIPO DE PAGAMENTO]
     buff.append("000000000000000");
     // Nº do Docto Atribuído pela Empresa 183 202 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
@@ -524,7 +525,7 @@ public class CNAB240 {
 
         // Valida o tamanho do Registro
         if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Trailer para o lote '" + lote.tipoLote + "'. A linha não ficou com 240 caracteres.");
-        lote.buff.append(buff).append("\r\n");
+        buff.append("\r\n");
         lote.contadorSegmentos++;
         return buff;
       default:
@@ -551,6 +552,8 @@ public class CNAB240 {
       StringBuilder buff = new StringBuilder();
       // Código do Banco na Compensação 1-3 3 - Num
       buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+      // Lote de Serviço 4 7 4 - Num
+      buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
       // Tipo de Registro 8-8 1 - Num ‘1’
       // +Tipo da Operação 9-9 1 - Alfa 'C'
       // +Tipo do Serviço 10 11 2 - Num
@@ -570,7 +573,7 @@ public class CNAB240 {
       }
       // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
       // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
-      buff.append("40 ");
+      buff.append("040 ");
       // Tipo de Inscrição da Empresa 18-18 1 - Num
       buff.append(tipoInscricao);
       // Número de Inscrição da Empresa 19-32 14 - Num
@@ -596,16 +599,16 @@ public class CNAB240 {
       // Nome da Rua, Av, Pça, Etc 143 172 30 - Alfa
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndLogradouro, 30));
       // Número do Local 173 177 5 - Num
-      buff.append(RUString.completeOrTruncateUntilLengthLeft("0", empresaEndNumero, 1));
+      buff.append(RUString.completeOrTruncateUntilLengthLeft("0", empresaEndNumero, 5));
       // Casa, Apto, Sala, Etc 178 192 15 - Alfa
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndComplemento, 15));
       // Cidade 193 212 20 - Alfa
-      buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndCidade, 15));
+      buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndCidade, 20));
       // CEP 213 217 5 - Num
       // +Complemento do CEP 218 220 3 - Alfa
-      buff.append(empresaEndCEP);
+      buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndCEP, 8));
       // Sigla do Estado 221 222 2 - Alfa
-      buff.append(empresaEndUF);
+      buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndUF, 2));
       // Uso Exclusivo da FEBRABAN/CNAB 223 230 8 - Alfa Brancos
       // +Código das Ocorrências p/ Retorno 231 240 10 - Alfa
       buff.append("                  ");
@@ -941,8 +944,8 @@ public class CNAB240 {
    * @return the g018 Número Seqüencial do Arquivo<br>
    *         Número seqüencial adotado e controlado pelo responsável pela geração do arquivo para ordenar a disposição dos arquivos encaminhados
    */
-  public String getNumeroSequencial() {
-    return numeroSequencial;
+  public String getNumeroSequencialArquivo() {
+    return numeroSequencialArquivo;
   }
 
   /**
@@ -950,12 +953,12 @@ public class CNAB240 {
    * Número seqüencial adotado e controlado pelo responsável pela geração do arquivo para ordenar a disposição dos arquivos encaminhados. <br>
    * Evoluir um número seqüencial a cada header de arquivo.
    *
-   * @param numeroSequencial the new g018 Número Seqüencial do Arquivo<br>
+   * @param numeroSequencialArquivo the new g018 Número Seqüencial do Arquivo<br>
    *          Número seqüencial adotado e controlado pelo responsável pela geração do arquivo para ordenar a disposição dos arquivos encaminhados
    */
-  public void setNumeroSequencial(String numeroSequencial) throws RFWException {
-    PreProcess.requiredNonNullMatch(numeroSequencial, "\\d{1,6}");
-    this.numeroSequencial = numeroSequencial;
+  public void setNumeroSequencialArquivo(String numeroSequencialArquivo) throws RFWException {
+    PreProcess.requiredNonNullMatch(numeroSequencialArquivo, "\\d{1,6}");
+    this.numeroSequencialArquivo = numeroSequencialArquivo;
   }
 
   /**
