@@ -1,4 +1,4 @@
-package br.eng.rodrigogml.rfw.finance;
+package br.eng.rodrigogml.rfw.finance.cnab240.writer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,7 +15,7 @@ import br.eng.rodrigogml.rfw.kernel.utils.RUDocValidation;
 import br.eng.rodrigogml.rfw.kernel.utils.RUString;
 
 /**
- * Description: Esta classe representa um arquivo CNAB240.<br>
+ * Description: Esta classe auxilia na escrita de um arquivo de remessa CNAB240.<br>
  * Seus métodos permitem que dados sejam adicionados para a geração rápida do arquivo compatível CNAB240.<br>
  * Por se tratar do sistema financeiro brasileiro esta classe utilizará nomes em português para simplificar a associação aos instrumentos financeiros brasileiros. <Br>
  * <bR>
@@ -29,7 +29,7 @@ import br.eng.rodrigogml.rfw.kernel.utils.RUString;
  * @author Rodrigo Leitão
  * @since (14 de fev. de 2025)
  */
-public class CNAB240 {
+public class CNAB240Remessa {
 
   /**
    * Enumeração com os diferentes tipos de lotes suportados pelo arquivo.
@@ -233,7 +233,7 @@ public class CNAB240 {
   /**
    * Inicia uma nova instância, que representará um novo arquivo CNAB240.
    */
-  public CNAB240() {
+  public CNAB240Remessa() {
   }
 
   /**
