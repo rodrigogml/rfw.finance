@@ -392,7 +392,7 @@ public class CNAB240 {
     PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
     PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
     PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
-    RUDocValidation.validateCPFOrCNPJ(beneficiarioNumeroInscricao);
+    RUDV.validateCPFOrCNPJ(beneficiarioNumeroInscricao);
 
     barCode = barCode.replaceAll("[^\\d]+", "");
     RUBills.isBoletoBarCodeValid(barCode);
@@ -431,7 +431,7 @@ public class CNAB240 {
     // Nome do Beneficiário 62 91 30 - Alfa
     buff.append(RUString.completeOrTruncateUntilLengthRight(" ", beneficiarioNome, 30));
     // Data do Vencimento (Nominal) 92 99 8 - Num
-    buff.append(RUDateTime.formatToddMMyyyy(dataVencimento));
+    buff.append(RUTypes.formatToddMMyyyy(dataVencimento));
     // Valor do Título (Nominal) 100 114 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorTitulo).movePointRight(2).abs().toPlainString(), 15));
     // Valor do Desconto + Abatimento 115 129 13 2 Num
@@ -439,7 +439,7 @@ public class CNAB240 {
     // Valor da Mora + Multa 130 144 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorMoraMulta).movePointRight(2).abs().toPlainString(), 15));
     // Data do Pagamento 145 152 8 - Num
-    buff.append(RUDateTime.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
     // Valor do Pagamento 153 167 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // Quantidade da Moeda 168 182 10 5 Num [NÃO UTILIZADO NESSE TIPO DE PAGAMENTO]
@@ -1127,7 +1127,7 @@ public class CNAB240 {
    *          Código do estado, unidade da federação componente do endereço utilizado para entrega de correspondência
    */
   public void setEmpresaEndUF(String empresaEndUF) throws RFWException {
-    RUDocValidation.validateUF(empresaEndUF);
+    RUDV.validateUF(empresaEndUF);
     this.empresaEndUF = empresaEndUF;
   }
 }
