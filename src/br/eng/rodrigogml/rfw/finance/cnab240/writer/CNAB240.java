@@ -10,9 +10,9 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 import br.eng.rodrigogml.rfw.kernel.preprocess.PreProcess;
 import br.eng.rodrigogml.rfw.kernel.utils.RUBills;
-import br.eng.rodrigogml.rfw.kernel.utils.RUDateTime;
-import br.eng.rodrigogml.rfw.kernel.utils.RUDocValidation;
+import br.eng.rodrigogml.rfw.kernel.utils.RUDV;
 import br.eng.rodrigogml.rfw.kernel.utils.RUString;
+import br.eng.rodrigogml.rfw.kernel.utils.RUTypes;
 
 /**
  * Description: Esta classe auxilia na escrita de um arquivo de remessa CNAB240.<br>
