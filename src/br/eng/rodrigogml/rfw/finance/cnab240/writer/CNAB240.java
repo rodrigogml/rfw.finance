@@ -43,6 +43,15 @@ public class CNAB240 {
      * Bloco com pagamentos de boletos de outros bancos.
      */
     TITULODECOBRANCA_OUTROSBANCOS,
+    /**
+     * Bloco com pagamentos de guias de serviço (Telefonia, gás, água, prefeituras, etc.)
+     */
+    GUIASSERVICO,
+    /**
+     * Bloco para registro das transferências de crédito em conta, quando a conta do beneficiário e do pagador estão na mesma instituição bancária.<Br>
+     * Em caso de instituições diferentes deve-se utilizar outras ferramentas como DOC, TED, Pix, etc.
+     */
+    SALARIO,
   }
 
   /**
@@ -403,9 +412,9 @@ public class CNAB240 {
     DadosLote lote = null;
 
     if (bancoBoleto.equals(codigoBanco)) {
-      lote = getLoteTituloPagamento(TipoLote.TITULODECOBRANCA_MESMOBANCO);
+      lote = getLote(TipoLote.TITULODECOBRANCA_MESMOBANCO);
     } else {
-      lote = getLoteTituloPagamento(TipoLote.TITULODECOBRANCA_OUTROSBANCOS);
+      lote = getLote(TipoLote.TITULODECOBRANCA_OUTROSBANCOS);
     }
 
     // ### SEGMENTO J
@@ -425,7 +434,7 @@ public class CNAB240 {
     // +...'7' = Indica LIQUIDAÇAO
     // +Código da Instrução p/ Movimento 16 17 2 - Num
     // +...'00' = Inclusão de Registro Detalhe Liberado
-    buff.append("J700");
+    buff.append("J000");
     // Código de Barras 18 61 44 - Num
     buff.append(barCode);
     // Nome do Beneficiário 62 91 30 - Alfa
@@ -501,6 +510,191 @@ public class CNAB240 {
     lote.contadorSegmentos++;
   }
 
+  /**
+   * Adiciona um pagamento do tipo título de cobrança.<br>
+   * Os pagamentos adicionados por este método são:<Br>
+   * <li>Boleto co código de barras (Do mesmo banco ou de outros, o módulo gerenciará os lotes automaticamente).
+   *
+   * @param barCode Código de Barras do Título de Cobrança, composto por 44 dígitos. Nâo aceita a representação numérica.
+   * @param dataVencimento Data de Vencimento Nominal<br>
+   *          Data de vencimento nominal.
+   * @param dataPagamento P009 Data do Pagamento<br>
+   *          Data do pagamento do compromisso.
+   * @param valorPagamento P010 Valor do Pagamento<br>
+   *          Valor do pagamento, expresso em moeda corrente.
+   * @param docID G064 Número do Documento Atribuído pela Empresa (Seu Número)<br>
+   *          Número atribuído pela Empresa (Pagador) para identificar o documento de Pagamento (Nota Fiscal, Nota Promissória, etc.)<br>
+   *          *Ou um id do pagamento gerado pelo sistema para identificar o pagamento no retorno, tamanho máximo de 20 dígitos.
+   * @param beneficiarioNome G013 Nome<Br>
+   *          Nome que identifica a pessoa, física ou jurídica, a qual se quer fazer referência.
+   * @throws RFWException
+   */
+  public void addPayment_GuiasServico(String barCode, LocalDate dataVencimento, LocalDate dataPagamento, BigDecimal valorPagamento, String docID, String beneficiarioNome) throws RFWException {
+    PreProcess.requiredNonNullCritical(codigoBanco, "Você deve definir o atributo Código do Banco para gerar o arquivo CNAB240.");
+    PreProcess.requiredNonNullCritical(dataVencimento, "Data de Vencimento não por ser nula.");
+    PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
+    PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
+    PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
+
+    barCode = barCode.replaceAll("[^\\d]+", "");
+    RUBills.isServiceBarCodeValid(barCode);
+
+    if (!barCode.substring(3, 4).equals("9")) throw new RFWCriticalException("Este método não suporta pagamentos em outra moeda que não Real (Código 9).");
+
+    DadosLote lote = getLote(TipoLote.GUIASSERVICO);
+
+    // ### SEGMENTO O
+    lote.contadorRegistros++;
+    StringBuilder buff = new StringBuilder();
+    // Código do Banco na Compensação 1-3 3 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo de Registro 8 8 1 - Num '3'
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento no Reg. Detalhe 14 14 1 - Alfa 'O'
+    // +Tipo de Movimento 15 15 1 - Num
+    // +...'0' = Indica INCLUSÃO
+    // +...'7' = Indica LIQUIDAÇAO
+    // +Código da Instrução p/ Movimento 16 17 2 - Num
+    // +...'00' = Inclusão de Registro Detalhe Liberado
+    buff.append("O000");
+    // Código de Barras 18 61 44 - Num
+    buff.append(barCode);
+    // Nome da Concessionária / Órgão Público 62-91 30 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", beneficiarioNome, 30));
+    // Data do Vencimento (Nominal) 92 99 8 - Num
+    buff.append(RUTypes.formatToddMMyyyy(dataVencimento));
+    // Data do Pagamento 100 107 8 - Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // Valor do Pagamento 108-122 13 2 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // Nº do Docto Atribuído pela Empresa 123-142 20 Alfa - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
+    // Nº do Docto Atribuído pelo Banco 143-162 20 - Alfa
+    // +Uso Exclusivo FEBRABAN/CNAB 163-230 68 - Alfa Brancos
+    // +Códigos das Ocorrências p/ Retorno 231-240 10 - Alfa
+    buff.append("                                                                                                  ");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento J para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento);
+  }
+
+  /**
+   * Adiciona um pagamento do tipo título de cobrança.<br>
+   * Os pagamentos adicionados por este método são:<Br>
+   * <li>Boleto co código de barras (Do mesmo banco ou de outros, o módulo gerenciará os lotes automaticamente).
+   *
+   * @param dataVencimento Data de Vencimento Nominal<br>
+   *          Data de vencimento nominal.
+   * @param beneficiarioNome G013 Nome<Br>
+   *          Nome que identifica a pessoa, física ou jurídica, a qual se quer fazer referência.
+   * @param outrasInformacoes
+   * @throws RFWException
+   */
+  /**
+   *
+   * @param favorecidoCodigoBancario código do banco do favorecido com 3 dígitos.
+   * @param favorecidoAgencia Agência da conta do favorecido.
+   * @param favorecidoAgenciaDV Digito verificador da agência do favorecido, se houver.
+   * @param favorecidoConta Número da conta do favorecido.
+   * @param favorecidoContaDV Dígito Verificador da conta do favorecido.
+   * @param favorecidoAgenciaContaDV Dígito Verificador do conjunto agência e conta do favorecido.
+   * @param favorecidoNome Nome do favorecido.
+   * @param dataPagamento P009 Data do Pagamento<br>
+   *          Data do pagamento do compromisso.
+   * @param valorPagamento P010 Valor do Pagamento<br>
+   *          Valor do pagamento, expresso em moeda corrente.
+   * @param docID G064 Número do Documento Atribuído pela Empresa (Seu Número)<br>
+   *          Número atribuído pela Empresa (Pagador) para identificar o documento de Pagamento (Nota Fiscal, Nota Promissória, etc.)<br>
+   *          *Ou um id do pagamento gerado pelo sistema para identificar o pagamento no retorno, tamanho máximo de 20 dígitos.
+   * @param outrasInformacoes Outras informações e mensagens do documento.
+   * @throws RFWException
+   */
+  public void addPayment_Salario(String favorecidoCodigoBancario, String favorecidoAgencia, String favorecidoAgenciaDV, String favorecidoConta, String favorecidoContaDV, String favorecidoAgenciaContaDV, String favorecidoNome, LocalDate dataPagamento, BigDecimal valorPagamento, String docID, String outrasInformacoes) throws RFWException {
+    PreProcess.requiredNonNullCritical(codigoBanco, "Você deve definir o atributo Código do Banco para gerar o arquivo CNAB240.");
+    PreProcess.requiredNonNullMatch(favorecidoCodigoBancario, "[\\d]{3}", "É esperado um código de banco com 3 dígitos");
+    PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
+    PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
+    PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
+    PreProcess.requiredNonNullMatch(favorecidoAgencia, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoAgenciaDV, "\\d{1}");
+    PreProcess.requiredNonNullMatch(favorecidoConta, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
+    PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
+    DadosLote lote = getLote(TipoLote.SALARIO);
+
+    // ### SEGMENTO O
+    lote.contadorRegistros++;
+    StringBuilder buff = new StringBuilder();
+    // Código do Banco na Compensação 1-3 3 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo de Registro 8 8 1 - Num '3'
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento no Reg. Detalhe 14 14 1 - Alfa 'A'
+    // +Tipo de Movimento 15 15 1 - Num
+    // +...'0' = Indica INCLUSÃO
+    // +...'7' = Indica LIQUIDAÇAO
+    // +Código da Instrução p/ Movimento 16 17 2 - Num
+    // +...'00' = Inclusão de Registro Detalhe Liberado
+    buff.append("A000");
+    // Código da Câmara Centralizadora 18 20 3 - Num
+    // ... Por ser pagamento no mesmo banco estou mandando 000 já que o manual não especifica e o código que funciona o Itaú envia 000
+    buff.append("000");
+    // Código do Banco do Favorecido 21 23 3 - Num
+    buff.append(favorecidoCodigoBancario);
+    // Ag. Mantenedora da Cta do Favor. 24 28 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoAgencia, 5));
+    // Dígito Verificador da Agência 29 29 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaDV, 1));
+    // Número da Conta Corrente 30 41 12 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoConta, 12));
+    // Dígito Verificador da Conta 42 42 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoContaDV, 1));
+    // Dígito Verificador da AG/Conta 43 43 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaContaDV, 1));
+    // Nome do Favorecido 44 73 30 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoNome, 30));
+    // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
+    // Data do Pagamento 94-101 8 - Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // Tipo da Moeda 102 104 3 - Alfa
+    buff.append("BRL");
+    // Quantidade da Moeda 105 119 10 5 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(5).abs().toPlainString(), 15));
+    // Valor do Pagamento 120 134 13 2 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // Nº do Docum. Atribuído pelo Banco 135 154 20 - Alfa
+    // +Data Real da Efetivação Pagto 155 162 8 - Num [PREENCHIDO SOMENTE NO RETORNO]
+    // +Valor Real da Efetivação do Pagto 163 177 13 2 Num [PREENCHIDO SOMENTE NO RETORNO]
+    buff.append("                              ");
+    // Outras Informações – Vide formatação em G031 para identificação de Deposito Judicial , Pgto.Salários de servidores pelo SIAPE, ou PIX. 178-217 40 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", outrasInformacoes, 40));
+    // Compl. Tipo Serviço 218 219 2 - Alfa
+    // +Codigo finalidade da TED 220 224 5 - Alfa
+    // +Complemento de finalidade pagto. 225 226 2 - Alfa
+    // +Uso Exclusivo FEBRABAN/CNAB 227 229 3 - Alfa Brancos
+    // +Aviso ao Favorecido 230 230 1 - Num *P006
+    // +Códigos das Ocorrências p/ Retorno 231 240 10 - Alfa
+    buff.append("06          0          ");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento J para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento);
+  }
+
   private StringBuilder writeBatchTrailer(DadosLote lote) throws RFWException {
     StringBuilder buff = new StringBuilder();
     switch (lote.tipoLote) {
@@ -540,7 +734,7 @@ public class CNAB240 {
    * @return
    * @throws RFWException
    */
-  private DadosLote getLoteTituloPagamento(TipoLote tipoLote) throws RFWException {
+  private DadosLote getLote(TipoLote tipoLote) throws RFWException {
     DadosLote lote = lotes.get(tipoLote);
     if (lote == null) {
       lote = new DadosLote();
@@ -557,24 +751,53 @@ public class CNAB240 {
       buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
       // Tipo de Registro 8-8 1 - Num ‘1’
       // +Tipo da Operação 9-9 1 - Alfa 'C'
-      // +Tipo do Serviço 10 11 2 - Num
-      // +... '98' = Pagamentos Diversos
-      buff.append("1C98");
+      buff.append("1C");
       switch (tipoLote) {
         case TITULODECOBRANCA_MESMOBANCO:
+          // Tipo do Serviço 10 11 2 - Num
+          // +... '98' = Pagamentos Diversos
+          buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
           // ...'30' = Liquidação de Títulos do Próprio Banco
           buff.append("30");
+          // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("040 ");
           break;
         case TITULODECOBRANCA_OUTROSBANCOS:
+          // Tipo do Serviço 10 11 2 - Num
+          // +... '98' = Pagamentos Diversos
+          buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
           // ...'30' = Liquidação de Títulos do Próprio Banco
           buff.append("31");
+          // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("040 ");
+          break;
+        case GUIASSERVICO:
+          // Tipo do Serviço 10 11 2 - Num
+          // +... '98' = Pagamentos Diversos
+          buff.append("98");
+          // Forma Lançamento Forma de Lançamento 12 13 2 - Num
+          // ...'30' = Liquidação de Títulos do Próprio Banco
+          buff.append("11");
+          // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '012'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("012 ");
+          break;
+        case SALARIO:
+          // Tipo do Serviço 10 11 2 - Num
+          // +...'30' = Pagamento Salários
+          buff.append("30");
+          // Forma Lançamento Forma de Lançamento 12 13 2 - Num
+          // ...'04' = Cartão Salário (somente para Tipo de Serviço = '30')
+          buff.append("04");
+          // Nº da Versão do Layout do Lote 14 16 3 - Num '046'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("046 ");
           break;
       }
-      // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
-      // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
-      buff.append("040 ");
       // Tipo de Inscrição da Empresa 18-18 1 - Num
       buff.append(tipoInscricao);
       // Número de Inscrição da Empresa 19-32 14 - Num
@@ -593,10 +816,8 @@ public class CNAB240 {
       buff.append(RUString.completeOrTruncateUntilLengthLeft("0", agenciaContaDV, 1));
       // Nome da Empresa 73-102 30 - Alfa
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", nomeEmpresa, 30));
-      // Nome do Banco 103-132 30 - Alfa
-      buff.append(RUString.completeOrTruncateUntilLengthRight(" ", nomeBanco, 30));
-      // Uso Exclusivo FEBRABAN / CNAB 133-142 10 - Alfa Brancos
-      buff.append("          ");
+      // Mensagem 103 142 40 - Alfa
+      buff.append("                                        ");
       // Nome da Rua, Av, Pça, Etc 143 172 30 - Alfa
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndLogradouro, 30));
       // Número do Local 173 177 5 - Num
@@ -610,9 +831,22 @@ public class CNAB240 {
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndCEP, 8));
       // Sigla do Estado 221 222 2 - Alfa
       buff.append(RUString.completeOrTruncateUntilLengthRight(" ", empresaEndUF, 2));
-      // Uso Exclusivo da FEBRABAN/CNAB 223 230 8 - Alfa Brancos
+      switch (tipoLote) {
+        case TITULODECOBRANCA_MESMOBANCO:
+        case TITULODECOBRANCA_OUTROSBANCOS:
+          // Uso Exclusivo da FEBRABAN/CNAB 223 230 8 - Alfa Brancos
+          buff.append("        ");
+          break;
+        case GUIASSERVICO:
+        case SALARIO:
+          // Indicativo de Forma de Pagamento do Compromisso 223 224 2 Num
+          // ...01 - Débito em Conta Corrente
+          // +Uso Exclusivo da FEBRABAN/CNAB 225 230 6 - Alfa Brancos
+          buff.append("01      ");
+          break;
+      }
       // +Código das Ocorrências p/ Retorno 231 240 10 - Alfa
-      buff.append("                  ");
+      buff.append("          ");
 
       // Valida o tamanho do Registro
       if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Header para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
