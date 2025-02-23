@@ -4,7 +4,7 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 
 /**
- * Description: Representa um registro do retirado do arquivo de Lote, pode representar mais de uma linha, quando os registros são compostos por mais de um segmento. Como por exemplo o segmento J, que pode conter o J52 ou J52 para Pix..<br>
+ * Description: Representa um registro do segmento J, e pode incluir o conteúdo de segmentos secundários omo o J52 ou J52 para Pix..<br>
  *
  * @author Rodrigo Leitão
  * @since (21 de fev. de 2025)

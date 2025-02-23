@@ -629,7 +629,7 @@ public class CNAB240 {
     PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
     DadosLote lote = getLote(TipoLote.SALARIO);
 
-    // ### SEGMENTO O
+    // ### SEGMENTO A
     lote.contadorRegistros++;
     StringBuilder buff = new StringBuilder();
     // Código do Banco na Compensação 1-3 3 - Num
@@ -649,6 +649,8 @@ public class CNAB240 {
     buff.append("A000");
     // Código da Câmara Centralizadora 18 20 3 - Num
     // ... Por ser pagamento no mesmo banco estou mandando 000 já que o manual não especifica e o código que funciona o Itaú envia 000
+    // ... Na página 172 do manual há referências para as Câmaras 018 e 700 quando o Tipo de Movimento é 03/41/42 Mas nada é mencionado para crédito em conta / pagamento de salário
+    // ... Durante pesquisa entendi que crédito em conta no mesmo banco não utiliza Câmara Centralizadora de compensação pois o fluxo interno do banco resolve a transferência.
     buff.append("000");
     // Código do Banco do Favorecido 21 23 3 - Num
     buff.append(favorecidoCodigoBancario);

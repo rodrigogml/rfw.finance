@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240Lote;
+import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterA;
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterDetail;
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterJ;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
@@ -200,8 +201,7 @@ public class CNAB240Parser {
             String segmento = line.substring(13, 14);
             switch (segmento) {
               case "J":
-                if (" ".equals(line.substring(14, 15)) && "52".equals(line.substring(17, 19))) {
-                  // Utiliza o Branco obrigatório do registro 52, que não é branco no registro J principal, para idenficicar se é um registro J ou o complementar J-52
+                if (" ".equals(line.substring(14, 15)) && "52".equals(line.substring(17, 19))) { // Utiliza o Branco obrigatório do registro 52, que não é branco no registro J principal, para idenficicar se é um registro J ou o complementar J-52
                   if (lastRegister == null || !(lastRegister instanceof CNAB240RegisterJ)) {
                     throw new RFWCriticalException("Encontrado um registro detalhe J-52 sem um registro J predecessor na linha '${0}'.", new String[] { "" + countLine });
                   }
@@ -211,6 +211,10 @@ public class CNAB240Parser {
                   lastRegister = new CNAB240RegisterJ(line);
                   lastLote.getRegisterList().add(lastRegister);
                 }
+                break;
+              case "A":
+                lastRegister = new CNAB240RegisterA(line);
+                lastLote.getRegisterList().add(lastRegister);
                 break;
               default:
                 RFWLogger.logDebug("Registro Segmento '${0}' ignorado por não haver suporte no parser!", new String[] { segmento });
