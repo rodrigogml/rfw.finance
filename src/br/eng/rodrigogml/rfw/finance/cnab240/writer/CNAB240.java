@@ -782,7 +782,7 @@ public class CNAB240 {
           // +... '98' = Pagamentos Diversos
           buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
-          // ...'30' = Liquidação de Títulos do Próprio Banco
+          // ...‘11’ = Pagamento de Contas e Tributos com Código de Barras
           buff.append("11");
           // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '012'
           // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
@@ -793,8 +793,8 @@ public class CNAB240 {
           // +...'30' = Pagamento Salários
           buff.append("30");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
-          // ...'04' = Cartão Salário (somente para Tipo de Serviço = '30')
-          buff.append("04");
+          // ...'01' = Crédito em Conta Corrente/Salário
+          buff.append("01");
           // Nº da Versão do Layout do Lote 14 16 3 - Num '046'
           // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
           buff.append("046 ");

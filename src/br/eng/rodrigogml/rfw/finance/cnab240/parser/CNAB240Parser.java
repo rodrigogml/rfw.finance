@@ -1,8 +1,6 @@
 package br.eng.rodrigogml.rfw.finance.cnab240.parser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -146,18 +144,6 @@ public class CNAB240Parser {
 
   // Mantém a referência para o último registro de retalhe criado.
   private CNAB240RegisterDetail lastRegister = null;
-
-  public static void main(String[] args) throws Exception {
-    // TODO Apagar ese método executável de testes assim que não estiver mais em uso
-    // String file = "c:\\Users\\Rodrigo\\Downloads\\LT001600-202502204153.ret";
-    String file = "\\\\frances\\public\\SB21025A.RET";
-    CNAB240Parser parser = new CNAB240Parser(new FileInputStream(new File(file)));
-    for (CNAB240Lote lote : parser.getLotes()) {
-      for (CNAB240RegisterDetail register : lote.getRegisterList()) {
-        System.out.println(register.getClass());
-      }
-    }
-  }
 
   /**
    * Instancia um objeto que representa um arquivo de retorno CNAB240.

@@ -1,7 +1,11 @@
 package br.eng.rodrigogml.rfw.finance.cnab240.parser.data;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
+import br.eng.rodrigogml.rfw.kernel.utils.RUTypes;
 
 /**
  * Description: Representa um registro do segmento A encontrado no arquivo.<br>
@@ -123,6 +127,16 @@ public class CNAB240RegisterA implements CNAB240RegisterDetail {
   /**
    * # data de Pagamento.
    *
+   * @return the data de Pagamento
+   * @throws RFWException
+   */
+  public LocalDate getDataPagamentoAsLocalDate() throws RFWException {
+    return RUTypes.parseLocalDate(dataPagamento, "ddMMuuuu");
+  }
+
+  /**
+   * # data de Pagamento.
+   *
    * @param dataPagamento the new data de Pagamento
    */
   public void setDataPagamento(String dataPagamento) {
@@ -141,6 +155,15 @@ public class CNAB240RegisterA implements CNAB240RegisterDetail {
   /**
    * # valor do Pagamento Final.
    *
+   * @return the valor do Pagamento Final
+   */
+  public BigDecimal getValorPagamentoAsBigDecimal() {
+    return new BigDecimal(valorPagamento).movePointLeft(2);
+  }
+
+  /**
+   * # valor do Pagamento Final.
+   *
    * @param valorPagamento the new valor do Pagamento Final
    */
   public void setValorPagamento(String valorPagamento) {
@@ -154,6 +177,15 @@ public class CNAB240RegisterA implements CNAB240RegisterDetail {
    */
   public String getDocID() {
     return docID;
+  }
+
+  /**
+   * # número do documento atribuído pelo sistema pra identificação na remessa.
+   *
+   * @return the número do documento atribuído pelo sistema pra identificação na remessa
+   */
+  public Long getDocIDAsLong() {
+    return Long.parseLong(docID);
   }
 
   /**
@@ -190,6 +222,16 @@ public class CNAB240RegisterA implements CNAB240RegisterDetail {
    */
   public String getOcorrencias() {
     return ocorrencias;
+  }
+
+  /**
+   * Recupera o valor do método {@link #getOcorrencias()} e quebra em um SetList com os códigos de duas em duas letras.
+   *
+   * @return the códigos de Ocorrencias de retorno
+   */
+  public String[] getOcorrenciasAsArray() {
+    if (this.ocorrencias == null) return null;
+    return ocorrencias.trim().split("(?<=\\G..)");
   }
 
   /**

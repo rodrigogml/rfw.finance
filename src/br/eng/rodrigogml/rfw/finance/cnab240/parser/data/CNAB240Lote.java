@@ -58,20 +58,34 @@ public class CNAB240Lote {
     // Lote de Serviço 4 7 4 - Num
     this.numeroLote = Integer.parseInt(line.substring(3, 7));
     // Tipo do Serviço 10 11 2 - Num
-    // +... '98' = Pagamentos Diversos
+    // ... '30' = Pagamento Salários
+    // ... '98' = Pagamentos Diversos
     this.tipoServico = line.substring(9, 11);
     // Forma Lançamento Forma de Lançamento 12 13 2 - Num
+    // ...'01' = Crédito em Conta Corrente/Salário
+    // ...'11' = Pagamento de Contas e Tributos com Código de Barras
     // ...'30' = Liquidação de Títulos do Próprio Banco
+    // ...'31' = Pagamento de Títulos de Outros Bancos
     this.formaLancamento = line.substring(11, 13);
     // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
     this.layout = line.substring(13, 16);
 
     // Define o Tipo de Lote de acordo com a combinação encontrada entre 'Tipo do Serviço' e 'Forma Lançamento'
-    if ("98".equals(this.tipoServico) && "30".equals(this.formaLancamento)) {
-      this.tipoLote = TipoLote.TITULODECOBRANCA_MESMOBANCO;
-    } else if ("98".equals(this.tipoServico) && "31".equals(this.formaLancamento)) {
-      this.tipoLote = TipoLote.TITULODECOBRANCA_OUTROSBANCOS;
-    } else {
+    if ("98".equals(this.tipoServico)) { // '98' = Pagamentos Diversos
+      if ("30".equals(this.formaLancamento)) { // '30' = Liquidação de Títulos do Próprio Banco
+        this.tipoLote = TipoLote.TITULODECOBRANCA_MESMOBANCO;
+      } else if ("31".equals(this.formaLancamento)) { // '31' = Pagamento de Títulos de Outros Bancos
+        this.tipoLote = TipoLote.TITULODECOBRANCA_OUTROSBANCOS;
+      } else if ("11".equals(this.formaLancamento)) { // '11' = Pagamento de Contas e Tributos com Código de Barras
+        this.tipoLote = TipoLote.SALARIO;
+      }
+    } else if ("30".equals(this.tipoServico)) { // '30' = Pagamento Salários
+      if ("01".equals(this.formaLancamento)) { // '01' = Crédito em Conta Corrente/Salário
+        this.tipoLote = TipoLote.SALARIO;
+      }
+    }
+
+    if (this.tipoLote == null) {
       throw new RFWCriticalException("Tipo de lote desconhecido para 'Tipo de Serviço = ${0}' e 'Forma de Lançamento = ${1}'.", new String[] { this.tipoServico, this.formaLancamento });
     }
 
