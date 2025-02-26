@@ -827,7 +827,7 @@ public class CNAB240 {
       buff.append("1C");
       switch (tipoLote) {
         case TITULODECOBRANCA_MESMOBANCO:
-          // Tipo do Serviço 10 11 2 - Num
+          // Tipo do Serviço 10 11 2 - Num *G025
           // +... '98' = Pagamentos Diversos
           buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
@@ -838,7 +838,7 @@ public class CNAB240 {
           buff.append("040 ");
           break;
         case TITULODECOBRANCA_OUTROSBANCOS:
-          // Tipo do Serviço 10 11 2 - Num
+          // Tipo do Serviço 10 11 2 - Num *G025
           // +... '98' = Pagamentos Diversos
           buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
@@ -849,7 +849,7 @@ public class CNAB240 {
           buff.append("040 ");
           break;
         case GUIASSERVICO:
-          // Tipo do Serviço 10 11 2 - Num
+          // Tipo do Serviço 10 11 2 - Num *G025
           // +... '98' = Pagamentos Diversos
           buff.append("98");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
@@ -860,9 +860,18 @@ public class CNAB240 {
           buff.append("012 ");
           break;
         case SALARIO:
-          // Tipo do Serviço 10 11 2 - Num
+          // Tipo do Serviço 10 11 2 - Num *G025
+          // +...'20' = Pagamento Fornecedor
           // +...'30' = Pagamento Salários
-          buff.append("30");
+          switch (this.codigoBanco) {
+            case "208": // Exceção BTG
+              // 20250226 - Em troca de email com o BTG, obtive a indicação de que para enviar o arquivo diretamente no menu de Transmissão CNAB deveria utilizar o código 20 mesmo para pagamento de salário. Ou solicitar a permissão de enviar o lote no menu de folha de pagamento, mas assim é possível enviar um único arquivo com diferentes tipos de pagamentos.
+              buff.append("20");
+              break;
+            default:
+              buff.append("30");
+              break;
+          }
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
           // ...'01' = Crédito em Conta Corrente/Salário
           buff.append("01");
