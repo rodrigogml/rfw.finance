@@ -59,8 +59,8 @@ public class CNAB240Lote {
     this.numeroLote = Integer.parseInt(line.substring(3, 7));
     // Tipo do Serviço 10 11 2 - Num
     // ...'20' = Pagamento Fornecedor
-    // ... '30' = Pagamento Salários
-    // ... '98' = Pagamentos Diversos
+    // ...'30' = Pagamento Salários
+    // ...'98' = Pagamentos Diversos
     this.tipoServico = line.substring(9, 11);
     // Forma Lançamento Forma de Lançamento 12 13 2 - Num
     // ...'01' = Crédito em Conta Corrente/Salário
@@ -78,7 +78,7 @@ public class CNAB240Lote {
       } else if ("31".equals(this.formaLancamento)) { // '31' = Pagamento de Títulos de Outros Bancos
         this.tipoLote = TipoLote.TITULODECOBRANCA_OUTROSBANCOS;
       } else if ("11".equals(this.formaLancamento)) { // '11' = Pagamento de Contas e Tributos com Código de Barras
-        this.tipoLote = TipoLote.SALARIO;
+        this.tipoLote = TipoLote.GUIASSERVICO;
       }
     } else if ("20".equals(this.tipoServico)) { // '20' = Pagamento Fornecedor / Crédito em conta (no BTG pode ser pagamento de Salário)
       if ("01".equals(this.formaLancamento)) { // '01' = Crédito em Conta Corrente/Salário

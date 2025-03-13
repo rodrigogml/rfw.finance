@@ -48,10 +48,18 @@ public class CNAB240 {
      */
     GUIASSERVICO,
     /**
-     * Bloco para registro das transferências de crédito em conta, quando a conta do beneficiário e do pagador estão na mesma instituição bancária.<Br>
+     * Bloco para registro das crédito de salário em conta salário na mesma instituição bancária.<Br>
      * Em caso de instituições diferentes deve-se utilizar outras ferramentas como DOC, TED, Pix, etc.
      */
     SALARIO,
+    /**
+     * Bloco para registro das transferências de crédito em conta corrente, quando a conta do beneficiário e do pagador estão na mesma instituição bancária.<Br>
+     */
+    TEFTED_CHECKING,
+    /**
+     * Bloco para registro das transferências de crédito em conta poupança, quando a conta do beneficiário e do pagador estão na mesma instituição bancária.<Br>
+     */
+    TEFTED_SAVINGS,
   }
 
   /**
@@ -291,7 +299,7 @@ public class CNAB240 {
     // Quantidade de Lotes do Arquivo 18 23 6 - Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + totalRegistros, 6));
     // Quantidade de Registros do Arquivo 24 29 6 - Num
-    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + (totalSegmentos + 1), 6)); // Soma o Header e o Trailer sendo criado
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + (totalSegmentos + 2), 6)); // Soma o Header e o Trailer criados
     // Qtde. de Contas Concil. Qtde de Contas p/ Conc. (Lotes) 30 35 6 - Num
     // Uso Exclusivo FEBRABAN/CNAB 36 240 205 - Alfa Brancos
     buff.append("000000                                                                                                                                                                                                             ");
@@ -417,8 +425,9 @@ public class CNAB240 {
       lote = getLote(TipoLote.TITULODECOBRANCA_OUTROSBANCOS);
     }
 
-    // ### SEGMENTO J
     lote.contadorRegistros++;
+
+    // ### SEGMENTO J
     StringBuilder buff = new StringBuilder();
     // Código do Banco na Compensação 1-3 3 - Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
@@ -548,12 +557,11 @@ public class CNAB240 {
     barCode = barCode.replaceAll("[^\\d]+", "");
     RUBills.isServiceBarCodeValid(barCode);
 
-    if (!barCode.substring(3, 4).equals("9")) throw new RFWCriticalException("Este método não suporta pagamentos em outra moeda que não Real (Código 9).");
-
     DadosLote lote = getLote(TipoLote.GUIASSERVICO);
 
-    // ### SEGMENTO O
     lote.contadorRegistros++;
+
+    // ### SEGMENTO O
     StringBuilder buff = new StringBuilder();
     // Código do Banco na Compensação 1-3 3 - Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
@@ -644,8 +652,9 @@ public class CNAB240 {
 
     DadosLote lote = getLote(TipoLote.SALARIO);
 
-    // ### SEGMENTO A
     lote.contadorRegistros++;
+
+    // ### SEGMENTO A
     StringBuilder buff = new StringBuilder();
     // Código do Banco na Compensação 1-3 3 - Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
@@ -710,11 +719,332 @@ public class CNAB240 {
     if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento B para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
     lote.buff.append(buff).append("\r\n");
     lote.contadorSegmentos++;
-    lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento);
+    // lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento); //Acumulado no próximo segmento
 
     // ### Segmento B
     buff = new StringBuilder();
+
+    // Código do Banco na Compensação 1 3 3 - Num G001
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num *G002
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo do Registro 8 8 1 - Num '3' *G003
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento do Reg. Detalhe 14 14 1 - Alfa 'B' *G039
+    // +Forma de Iniciação 15 17 3 - Alfa
+    // +Tipo de Inscrição do Favorecido 18 18 1 - Num *G005
+    // +...'1' = CPF
+    // +...'2' = CGC / CNPJ
+    buff.append("B   1");
+    // Nº de Inscrição do Favorecido 19 32 14 - Num *G006
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + favorecidoCPF, 14));
+    // Informação 10 33 67 35 - Alfa G101
+    // ...Logradouro do Favorecido: Nome da Rua, Av, Pça, Etc Posição (33 67) Alfa
+    buff.append("                                   ");
+    // Informação 11 68 127 60 - Alfa G101
+    // ...Número Nº do Local Posição (68 72) Num
+    // ...Complemento Casa, Apto, Etc Posição (73 87) Alfa
+    // ...Bairro Bairro Posição (88 102) Alfa
+    // ...Cidade Nome da Cidade Posição (103 117) Alfa
+    // ...CEP CEP Posição (118 122) Num
+    // ...Complem. CEP Complem. CEP Posição (123 125) Alfa
+    // ...Estado Sigla do Estado Posição (126 127) Alfa
+    buff.append("00000                                             00000     ");
+    // Informação 12 128 226 99 - Alfa G101
+    // ...Vencimento Data do Vencimento (Nominal) 128 135 Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // ...Valor Docum. Valor do Documento (Nominal) 136 150 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // ...Abatimento Valor do Abatimento 151 165 Num
+    // ...Desconto Valor do Desconto 166 180 Num
+    // ...Mora Valor da Mora 181 195 Num
+    // ...Multa Valor da Multa 196 210 Num
+    // ...Cód/Doc. Favorec. Código/Documento do Favorecido 211 225 Alfa
+    // ...Aviso Aviso ao Favorecido 226 226 Num
+    buff.append("                                                                            ");
+    // Uso Exclusivo para o SIAPE 227 232 6 - Num P012
+    // +Identificação do Banco no SPB Código ISPB 233 240 8 - Num P015
+    buff.append("00000000000000");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento B para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento);
+  }
+
+  /**
+   *
+   * @param favorecidoCodigoBancario código do banco do favorecido com 3 dígitos.
+   * @param favorecidoAgencia Agência da conta do favorecido.
+   * @param favorecidoAgenciaDV Digito verificador da agência do favorecido, se houver.
+   * @param favorecidoConta Número da conta do favorecido.
+   * @param favorecidoContaDV Dígito Verificador da conta do favorecido.
+   * @param favorecidoAgenciaContaDV Dígito Verificador do conjunto agência e conta do favorecido.
+   * @param favorecidoNome Nome do favorecido.
+   * @param dataPagamento P009 Data do Pagamento<br>
+   *          Data do pagamento do compromisso.
+   * @param valorPagamento P010 Valor do Pagamento<br>
+   *          Valor do pagamento, expresso em moeda corrente.
+   * @param docID G064 Número do Documento Atribuído pela Empresa (Seu Número)<br>
+   *          Número atribuído pela Empresa (Pagador) para identificar o documento de Pagamento (Nota Fiscal, Nota Promissória, etc.)<br>
+   *          *Ou um id do pagamento gerado pelo sistema para identificar o pagamento no retorno, tamanho máximo de 20 dígitos.
+   * @param outrasInformacoes Outras informações e mensagens do documento.
+   * @param favorecidoCPF G006 Número de Inscrição da Empresa<br>
+   *          Número de inscrição da Empresa ou Pessoa Física perante uma Instituição governamental.<Br>
+   *          Quando o Tipo de Inscrição for igual a zero (não informado), preencher com zeros.
+   * @throws RFWException
+   */
+  public void addPayment_TEDTEF_CheckingAccount(String favorecidoCodigoBancario, String favorecidoAgencia, String favorecidoAgenciaDV, String favorecidoConta, String favorecidoContaDV, String favorecidoAgenciaContaDV, String favorecidoNome, LocalDate dataPagamento, BigDecimal valorPagamento, String docID, String outrasInformacoes, String favorecidoCPF) throws RFWException {
+    PreProcess.requiredNonNullCritical(codigoBanco, "Você deve definir o atributo Código do Banco para gerar o arquivo CNAB240.");
+    PreProcess.requiredNonNullMatch(favorecidoCodigoBancario, "[\\d]{3}", "É esperado um código de banco com 3 dígitos");
+    PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
+    PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
+    PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
+    PreProcess.requiredNonNullMatch(favorecidoAgencia, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoAgenciaDV, "\\d{1}");
+    PreProcess.requiredNonNullMatch(favorecidoConta, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
+    PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
+    PreProcess.requiredMatch(favorecidoCPF, "\\d{11}");
+    RUDV.validateCPF(favorecidoCPF);
+
+    DadosLote lote = getLote(TipoLote.TEFTED_CHECKING);
+
     lote.contadorRegistros++;
+
+    // ### SEGMENTO A
+    StringBuilder buff = new StringBuilder();
+    // Código do Banco na Compensação 1-3 3 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo de Registro 8 8 1 - Num '3'
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento no Reg. Detalhe 14 14 1 - Alfa 'A'
+    // +Tipo de Movimento 15 15 1 - Num
+    // +...'0' = Indica INCLUSÃO
+    // +...'7' = Indica LIQUIDAÇAO
+    // +Código da Instrução p/ Movimento 16 17 2 - Num
+    // +...'00' = Inclusão de Registro Detalhe Liberado
+    buff.append("A000");
+    // Código da Câmara Centralizadora 18 20 3 - Num
+    // ... Por ser pagamento no mesmo banco estou mandando 000 já que o manual não especifica e o código que funciona o Itaú envia 000
+    // ... Na página 172 do manual há referências para as Câmaras 018 e 700 quando o Tipo de Movimento é 03/41/42 Mas nada é mencionado para crédito em conta / pagamento de salário
+    // ... Durante pesquisa entendi que crédito em conta no mesmo banco não utiliza Câmara Centralizadora de compensação pois o fluxo interno do banco resolve a transferência.
+    buff.append("000");
+    // Código do Banco do Favorecido 21 23 3 - Num
+    buff.append(favorecidoCodigoBancario);
+    // Ag. Mantenedora da Cta do Favor. 24 28 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoAgencia, 5));
+    // Dígito Verificador da Agência 29 29 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaDV, 1));
+    // Número da Conta Corrente 30 41 12 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoConta, 12));
+    // Dígito Verificador da Conta 42 42 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoContaDV, 1));
+    // Dígito Verificador da AG/Conta 43 43 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaContaDV, 1));
+    // Nome do Favorecido 44 73 30 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoNome, 30));
+    // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
+    // Data do Pagamento 94-101 8 - Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // Tipo da Moeda 102 104 3 - Alfa
+    buff.append("BRL");
+    // Quantidade da Moeda 105 119 10 5 Num
+    // buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(5).abs().toPlainString(), 15));
+    buff.append("000000000000000");
+    // Valor do Pagamento 120 134 13 2 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // Nº do Docum. Atribuído pelo Banco 135 154 20 - Alfa
+    // +Data Real da Efetivação Pagto 155 162 8 - Num [PREENCHIDO SOMENTE NO RETORNO]
+    // +Valor Real da Efetivação do Pagto 163 177 13 2 Num [PREENCHIDO SOMENTE NO RETORNO]
+    buff.append("                    00000000000000000000000");
+    // Outras Informações – Vide formatação em G031 para identificação de Deposito Judicial , Pgto.Salários de servidores pelo SIAPE, ou PIX. 178-217 40 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", outrasInformacoes, 40));
+    // Compl. Tipo Serviço 218 219 2 - Alfa
+    // +Codigo finalidade da TED 220 224 5 - Alfa
+    // +Complemento de finalidade pagto. 225 226 2 - Alfa
+    // +Uso Exclusivo FEBRABAN/CNAB 227 229 3 - Alfa Brancos
+    // +Aviso ao Favorecido 230 230 1 - Num *P006
+    // +Códigos das Ocorrências p/ Retorno 231 240 10 - Alfa
+    buff.append("06          0          ");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento B para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    // lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento); //Acumulado no próximo segmento
+
+    // ### Segmento B
+    buff = new StringBuilder();
+
+    // Código do Banco na Compensação 1 3 3 - Num G001
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num *G002
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo do Registro 8 8 1 - Num '3' *G003
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento do Reg. Detalhe 14 14 1 - Alfa 'B' *G039
+    // +Forma de Iniciação 15 17 3 - Alfa
+    // +Tipo de Inscrição do Favorecido 18 18 1 - Num *G005
+    // +...'1' = CPF
+    // +...'2' = CGC / CNPJ
+    buff.append("B   1");
+    // Nº de Inscrição do Favorecido 19 32 14 - Num *G006
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + favorecidoCPF, 14));
+    // Informação 10 33 67 35 - Alfa G101
+    // ...Logradouro do Favorecido: Nome da Rua, Av, Pça, Etc Posição (33 67) Alfa
+    buff.append("                                   ");
+    // Informação 11 68 127 60 - Alfa G101
+    // ...Número Nº do Local Posição (68 72) Num
+    // ...Complemento Casa, Apto, Etc Posição (73 87) Alfa
+    // ...Bairro Bairro Posição (88 102) Alfa
+    // ...Cidade Nome da Cidade Posição (103 117) Alfa
+    // ...CEP CEP Posição (118 122) Num
+    // ...Complem. CEP Complem. CEP Posição (123 125) Alfa
+    // ...Estado Sigla do Estado Posição (126 127) Alfa
+    buff.append("00000                                             00000     ");
+    // Informação 12 128 226 99 - Alfa G101
+    // ...Vencimento Data do Vencimento (Nominal) 128 135 Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // ...Valor Docum. Valor do Documento (Nominal) 136 150 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // ...Abatimento Valor do Abatimento 151 165 Num
+    // ...Desconto Valor do Desconto 166 180 Num
+    // ...Mora Valor da Mora 181 195 Num
+    // ...Multa Valor da Multa 196 210 Num
+    // ...Cód/Doc. Favorec. Código/Documento do Favorecido 211 225 Alfa
+    // ...Aviso Aviso ao Favorecido 226 226 Num
+    buff.append("                                                                            ");
+    // Uso Exclusivo para o SIAPE 227 232 6 - Num P012
+    // +Identificação do Banco no SPB Código ISPB 233 240 8 - Num P015
+    buff.append("00000000000000");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento B para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento);
+  }
+
+  /**
+   *
+   * @param favorecidoCodigoBancario código do banco do favorecido com 3 dígitos.
+   * @param favorecidoAgencia Agência da conta do favorecido.
+   * @param favorecidoAgenciaDV Digito verificador da agência do favorecido, se houver.
+   * @param favorecidoConta Número da conta do favorecido.
+   * @param favorecidoContaDV Dígito Verificador da conta do favorecido.
+   * @param favorecidoAgenciaContaDV Dígito Verificador do conjunto agência e conta do favorecido.
+   * @param favorecidoNome Nome do favorecido.
+   * @param dataPagamento P009 Data do Pagamento<br>
+   *          Data do pagamento do compromisso.
+   * @param valorPagamento P010 Valor do Pagamento<br>
+   *          Valor do pagamento, expresso em moeda corrente.
+   * @param docID G064 Número do Documento Atribuído pela Empresa (Seu Número)<br>
+   *          Número atribuído pela Empresa (Pagador) para identificar o documento de Pagamento (Nota Fiscal, Nota Promissória, etc.)<br>
+   *          *Ou um id do pagamento gerado pelo sistema para identificar o pagamento no retorno, tamanho máximo de 20 dígitos.
+   * @param outrasInformacoes Outras informações e mensagens do documento.
+   * @param favorecidoCPF G006 Número de Inscrição da Empresa<br>
+   *          Número de inscrição da Empresa ou Pessoa Física perante uma Instituição governamental.<Br>
+   *          Quando o Tipo de Inscrição for igual a zero (não informado), preencher com zeros.
+   * @throws RFWException
+   */
+  public void addPayment_TEDTEF_SavingsAccount(String favorecidoCodigoBancario, String favorecidoAgencia, String favorecidoAgenciaDV, String favorecidoConta, String favorecidoContaDV, String favorecidoAgenciaContaDV, String favorecidoNome, LocalDate dataPagamento, BigDecimal valorPagamento, String docID, String outrasInformacoes, String favorecidoCPF) throws RFWException {
+    PreProcess.requiredNonNullCritical(codigoBanco, "Você deve definir o atributo Código do Banco para gerar o arquivo CNAB240.");
+    PreProcess.requiredNonNullMatch(favorecidoCodigoBancario, "[\\d]{3}", "É esperado um código de banco com 3 dígitos");
+    PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
+    PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
+    PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
+    PreProcess.requiredNonNullMatch(favorecidoAgencia, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoAgenciaDV, "\\d{1}");
+    PreProcess.requiredNonNullMatch(favorecidoConta, "\\d{1,5}");
+    PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
+    PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
+    PreProcess.requiredMatch(favorecidoCPF, "\\d{11}");
+    RUDV.validateCPF(favorecidoCPF);
+
+    DadosLote lote = getLote(TipoLote.TEFTED_SAVINGS);
+
+    lote.contadorRegistros++;
+
+    // ### SEGMENTO A
+    StringBuilder buff = new StringBuilder();
+    // Código do Banco na Compensação 1-3 3 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
+    // Lote de Serviço 4 7 4 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
+    // Tipo de Registro 8 8 1 - Num '3'
+    buff.append("3");
+    // Nº Seqüencial do Registro no Lote 9 13 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.contadorRegistros, 5));
+    // Código de Segmento no Reg. Detalhe 14 14 1 - Alfa 'A'
+    // +Tipo de Movimento 15 15 1 - Num
+    // +...'0' = Indica INCLUSÃO
+    // +...'7' = Indica LIQUIDAÇAO
+    // +Código da Instrução p/ Movimento 16 17 2 - Num
+    // +...'00' = Inclusão de Registro Detalhe Liberado
+    buff.append("A000");
+    // Código da Câmara Centralizadora 18 20 3 - Num
+    // ... Por ser pagamento no mesmo banco estou mandando 000 já que o manual não especifica e o código que funciona o Itaú envia 000
+    // ... Na página 172 do manual há referências para as Câmaras 018 e 700 quando o Tipo de Movimento é 03/41/42 Mas nada é mencionado para crédito em conta / pagamento de salário
+    // ... Durante pesquisa entendi que crédito em conta no mesmo banco não utiliza Câmara Centralizadora de compensação pois o fluxo interno do banco resolve a transferência.
+    buff.append("000");
+    // Código do Banco do Favorecido 21 23 3 - Num
+    buff.append(favorecidoCodigoBancario);
+    // Ag. Mantenedora da Cta do Favor. 24 28 5 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoAgencia, 5));
+    // Dígito Verificador da Agência 29 29 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaDV, 1));
+    // Número da Conta Corrente 30 41 12 - Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", favorecidoConta, 12));
+    // Dígito Verificador da Conta 42 42 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoContaDV, 1));
+    // Dígito Verificador da AG/Conta 43 43 1 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoAgenciaContaDV, 1));
+    // Nome do Favorecido 44 73 30 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", favorecidoNome, 30));
+    // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
+    // Data do Pagamento 94-101 8 - Num
+    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    // Tipo da Moeda 102 104 3 - Alfa
+    buff.append("BRL");
+    // Quantidade da Moeda 105 119 10 5 Num
+    // buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(5).abs().toPlainString(), 15));
+    buff.append("000000000000000");
+    // Valor do Pagamento 120 134 13 2 Num
+    buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
+    // Nº do Docum. Atribuído pelo Banco 135 154 20 - Alfa
+    // +Data Real da Efetivação Pagto 155 162 8 - Num [PREENCHIDO SOMENTE NO RETORNO]
+    // +Valor Real da Efetivação do Pagto 163 177 13 2 Num [PREENCHIDO SOMENTE NO RETORNO]
+    buff.append("                    00000000000000000000000");
+    // Outras Informações – Vide formatação em G031 para identificação de Deposito Judicial , Pgto.Salários de servidores pelo SIAPE, ou PIX. 178-217 40 - Alfa
+    buff.append(RUString.completeOrTruncateUntilLengthRight(" ", outrasInformacoes, 40));
+    // Compl. Tipo Serviço 218 219 2 - Alfa
+    // +Codigo finalidade da TED 220 224 5 - Alfa
+    // +Complemento de finalidade pagto. 225 226 2 - Alfa
+    // +Uso Exclusivo FEBRABAN/CNAB 227 229 3 - Alfa Brancos
+    // +Aviso ao Favorecido 230 230 1 - Num *P006
+    // +Códigos das Ocorrências p/ Retorno 231 240 10 - Alfa
+    buff.append("06          0          ");
+
+    // Valida o tamanho do Registro
+    if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Segmento B para o Lote de Títulos de Cobrança do Mesmo Banco. A linha não ficou com 240 caracteres.");
+    lote.buff.append(buff).append("\r\n");
+    lote.contadorSegmentos++;
+    // lote.acumuladorValor = lote.acumuladorValor.add(valorPagamento); //Acumulado no próximo segmento
+
+    // ### Segmento B
+    buff = new StringBuilder();
 
     // Código do Banco na Compensação 1 3 3 - Num G001
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
@@ -770,35 +1100,50 @@ public class CNAB240 {
   private StringBuilder writeBatchTrailer(DadosLote lote) throws RFWException {
     StringBuilder buff = new StringBuilder();
     switch (lote.tipoLote) {
+      case GUIASSERVICO:
       case TITULODECOBRANCA_MESMOBANCO:
       case TITULODECOBRANCA_OUTROSBANCOS:
+      case TEFTED_CHECKING:
+      case TEFTED_SAVINGS:
       case SALARIO:
         // Código do Banco na Compensação 1-3 3 - Num
         buff.append(RUString.completeOrTruncateUntilLengthLeft("0", codigoBanco, 3));
         // Lote de Serviço 4 7 4 - Num
         buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + lote.numeroLote, 4));
-        // Tipo de Registro 8 8 1 - Num '3'
+        // Tipo de Registro 8 8 1 - Num '5'
         // +Uso Exclusivo FEBRABAN/CNAB 9 17 9 - Alfa Brancos
         buff.append("5         ");
         // Quantidade de Registros do Lote 18-23 6 - Num [CHAMADO DE CONTADOR DE SEGMENTOS NO CÓDIGO] Incluí +1 para o Header e +1 para o próprio Trailer
         buff.append(RUString.completeOrTruncateUntilLengthLeft("0", "" + (lote.contadorSegmentos + 1), 6)); // Soma o Trailer
         // Somatória dos Valores 24 41 16 2 Num [SOMATÓRIA DO CAMPO VALOR DE PAGAMENTO DOS SEGMENTOS J]
         buff.append(RUString.completeOrTruncateUntilLengthLeft("0", lote.acumuladorValor.movePointRight(2).abs().toPlainString(), 18));
-        // Somatória de Quantidade de Moedas 42 59 13 5 Num [DEIXADO EM ZERO POIS NÃO ESCREVEMOS NESSE CAMPO]
-        buff.append("000000000000000000");
-        // Número Aviso Débito 60 65 6 - Num
-        // +Uso Exclusivo FEBRABAN/CNAB 66 230 165 - Alfa Brancos
-        // +Códigos das Ocorrências para Retorno 231 240 10 - Alfa
-        buff.append("                                                                                                                                                                                     ");
+        switch (lote.tipoLote) {
+          case GUIASSERVICO:
+            // Complemento de registro Complemento de registro 42 230 189 - Alfa Brancos
+            // +Códigos das Ocorrências para Retorno 231 240 10 - Alfa *
+            buff.append("                                                                                                                                                                                                       ");
+            break;
+          case SALARIO:
+          case TEFTED_CHECKING:
+          case TEFTED_SAVINGS:
+          case TITULODECOBRANCA_MESMOBANCO:
+          case TITULODECOBRANCA_OUTROSBANCOS:
+            // Somatória de Quantidade de Moedas 42 59 13 5 Num [DEIXADO EM ZERO POIS NÃO ESCREVEMOS NESSE CAMPO]
+            buff.append("000000000000000000");
+            // Número Aviso Débito 60 65 6 - Num
+            // +Uso Exclusivo FEBRABAN/CNAB 66 230 165 - Alfa Brancos
+            // +Códigos das Ocorrências para Retorno 231 240 10 - Alfa
+            buff.append("                                                                                                                                                                                     ");
+            break;
+        }
 
         // Valida o tamanho do Registro
         if (buff.length() != 240) throw new RFWCriticalException("Falha ao criar o Trailer para o lote '" + lote.tipoLote + "'. A linha não ficou com 240 caracteres.");
         buff.append("\r\n");
         lote.contadorSegmentos++;
         return buff;
-      default:
-        throw new RFWCriticalException("Trailer para o lote '" + lote.tipoLote + "' ainda não implementado!");
     }
+    throw new RFWCriticalException("Trailer para o lote '" + lote.tipoLote + "' ainda não implementado!");
   }
 
   /**
@@ -861,20 +1206,33 @@ public class CNAB240 {
           break;
         case SALARIO:
           // Tipo do Serviço 10 11 2 - Num *G025
-          // +...'20' = Pagamento Fornecedor
           // +...'30' = Pagamento Salários
-          switch (this.codigoBanco) {
-            case "208": // Exceção BTG
-              // 20250226 - Em troca de email com o BTG, obtive a indicação de que para enviar o arquivo diretamente no menu de Transmissão CNAB deveria utilizar o código 20 mesmo para pagamento de salário. Ou solicitar a permissão de enviar o lote no menu de folha de pagamento, mas assim é possível enviar um único arquivo com diferentes tipos de pagamentos.
-              buff.append("20");
-              break;
-            default:
-              buff.append("30");
-              break;
-          }
+          buff.append("30");
           // Forma Lançamento Forma de Lançamento 12 13 2 - Num
           // ...'01' = Crédito em Conta Corrente/Salário
           buff.append("01");
+          // Nº da Versão do Layout do Lote 14 16 3 - Num '046'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("046 ");
+          break;
+        case TEFTED_CHECKING:
+          // Tipo do Serviço 10 11 2 - Num *G025
+          // +...'20' = Pagamento Fornecedor
+          buff.append("20");
+          // Forma Lançamento Forma de Lançamento 12 13 2 - Num *G029
+          // ...'01' = Crédito em Conta Corrente/Salário
+          buff.append("01");
+          // Nº da Versão do Layout do Lote 14 16 3 - Num '046'
+          // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
+          buff.append("046 ");
+          break;
+        case TEFTED_SAVINGS:
+          // Tipo do Serviço 10 11 2 - Num *G025
+          // +...'20' = Pagamento Fornecedor
+          buff.append("20");
+          // Forma Lançamento Forma de Lançamento 12 13 2 - Num *G029
+          // ...'05' = Crédito em Conta Poupança
+          buff.append("05");
           // Nº da Versão do Layout do Lote 14 16 3 - Num '046'
           // +Uso Exclusivo da FEBRABAN/CNAB 17-17 1 - Alfa Brancos
           buff.append("046 ");
@@ -921,6 +1279,8 @@ public class CNAB240 {
           break;
         case GUIASSERVICO:
         case SALARIO:
+        case TEFTED_CHECKING:
+        case TEFTED_SAVINGS:
           // Indicativo de Forma de Pagamento do Compromisso 223 224 2 Num
           // ...01 - Débito em Conta Corrente
           // +Uso Exclusivo da FEBRABAN/CNAB 225 230 6 - Alfa Brancos

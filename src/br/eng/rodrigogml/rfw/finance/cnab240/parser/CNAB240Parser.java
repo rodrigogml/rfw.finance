@@ -11,6 +11,7 @@ import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240Lote;
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterA;
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterDetail;
 import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterJ;
+import br.eng.rodrigogml.rfw.finance.cnab240.parser.data.CNAB240RegisterO;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWValidationException;
@@ -202,6 +203,9 @@ public class CNAB240Parser {
                 lastRegister = new CNAB240RegisterA(line);
                 lastLote.getRegisterList().add(lastRegister);
                 break;
+              case "O":
+                lastRegister = new CNAB240RegisterO(line);
+                lastLote.getRegisterList().add(lastRegister);
               default:
                 RFWLogger.logDebug("Registro Segmento '${0}' ignorado por não haver suporte no parser!", new String[] { segmento });
                 break;
