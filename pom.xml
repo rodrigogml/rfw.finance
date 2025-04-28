@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>br.eng.rodrigogml.rfw</groupId>
 	<artifactId>RFW.Finance</artifactId>
@@ -30,10 +32,10 @@
 				<configuration>
 					<target>1.8</target>
 					<source>1.8</source>
-<!--					<release>20</release>-->
-		            <debug>true</debug>
-		            <debuglevel>lines,vars,source</debuglevel>
-  				</configuration>
+					<!--					<release>20</release>-->
+					<debug>true</debug>
+					<debuglevel>lines,vars,source</debuglevel>
+				</configuration>
 			</plugin>
 			<!-- Copy project dependency -->
 			<plugin>
@@ -66,11 +68,18 @@
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>br.eng.rodrigogml.rfw</groupId>
 			<artifactId>RFW.Kernel</artifactId>
 			<version>1.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+
 	</dependencies>
 </project>
