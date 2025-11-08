@@ -10,7 +10,7 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 import br.eng.rodrigogml.rfw.kernel.preprocess.PreProcess;
 import br.eng.rodrigogml.rfw.kernel.utils.RUBills;
-import br.eng.rodrigogml.rfw.kernel.utils.RUDocVal;
+import br.eng.rodrigogml.rfw.kernel.utils.RUValueValidation;
 import br.eng.rodrigogml.rfw.kernel.utils.RUString;
 import br.eng.rodrigogml.rfw.kernel.utils.RUTypes;
 
@@ -409,7 +409,7 @@ public class CNAB240 {
     PreProcess.requiredNonNullPositive(valorPagamento, "Deve ser informado um valor válido e positivo para Valor do Pagamento.");
     PreProcess.requiredNonNullMatch(docID, "[\\d]{0,20}");
     PreProcess.requiredNonNull(dataPagamento, "Data de pagamento não pode ser nula!");
-    RUDocVal.validateCPFOrCNPJ(beneficiarioNumeroInscricao);
+    RUValueValidation.validateCPFOrCNPJ(beneficiarioNumeroInscricao);
 
     barCode = barCode.replaceAll("[^\\d]+", "");
     RUBills.isBoletoBarCodeValid(barCode);
@@ -648,7 +648,7 @@ public class CNAB240 {
     PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoCPF, "\\d{11}");
-    RUDocVal.validateCPF(favorecidoCPF);
+    RUValueValidation.validateCPF(favorecidoCPF);
 
     DadosLote lote = getLote(TipoLote.SALARIO);
 
@@ -809,7 +809,7 @@ public class CNAB240 {
     PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoCPF, "\\d{11}");
-    RUDocVal.validateCPF(favorecidoCPF);
+    RUValueValidation.validateCPF(favorecidoCPF);
 
     DadosLote lote = getLote(TipoLote.TEFTED_CHECKING);
 
@@ -970,7 +970,7 @@ public class CNAB240 {
     PreProcess.requiredMatch(favorecidoContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoAgenciaContaDV, "\\d{1}");
     PreProcess.requiredMatch(favorecidoCPF, "\\d{11}");
-    RUDocVal.validateCPF(favorecidoCPF);
+    RUValueValidation.validateCPF(favorecidoCPF);
 
     DadosLote lote = getLote(TipoLote.TEFTED_SAVINGS);
 
@@ -1803,7 +1803,7 @@ public class CNAB240 {
    *          Código do estado, unidade da federação componente do endereço utilizado para entrega de correspondência
    */
   public void setEmpresaEndUF(String empresaEndUF) throws RFWException {
-    RUDocVal.validateUF(empresaEndUF);
+    RUValueValidation.validateUF(empresaEndUF);
     this.empresaEndUF = empresaEndUF;
   }
 }
