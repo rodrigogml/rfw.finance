@@ -449,7 +449,7 @@ public class CNAB240 {
     // Nome do Beneficiário 62 91 30 - Alfa
     buff.append(RUString.completeOrTruncateUntilLengthRight(" ", beneficiarioNome, 30));
     // Data do Vencimento (Nominal) 92 99 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataVencimento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataVencimento));
     // Valor do Título (Nominal) 100 114 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorTitulo).movePointRight(2).abs().toPlainString(), 15));
     // Valor do Desconto + Abatimento 115 129 13 2 Num
@@ -457,7 +457,7 @@ public class CNAB240 {
     // Valor da Mora + Multa 130 144 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorMoraMulta).movePointRight(2).abs().toPlainString(), 15));
     // Data do Pagamento 145 152 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // Valor do Pagamento 153 167 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // Quantidade da Moeda 168 182 10 5 Num [NÃO UTILIZADO NESSE TIPO DE PAGAMENTO]
@@ -583,9 +583,9 @@ public class CNAB240 {
     // Nome da Concessionária / Órgão Público 62-91 30 - Alfa
     buff.append(RUString.completeOrTruncateUntilLengthRight(" ", beneficiarioNome, 30));
     // Data do Vencimento (Nominal) 92 99 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataVencimento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataVencimento));
     // Data do Pagamento 100 107 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // Valor do Pagamento 108-122 13 2 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // Nº do Docto Atribuído pela Empresa 123-142 20 Alfa - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
@@ -693,7 +693,7 @@ public class CNAB240 {
     // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
     // Data do Pagamento 94-101 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // Tipo da Moeda 102 104 3 - Alfa
     buff.append("BRL");
     // Quantidade da Moeda 105 119 10 5 Num
@@ -754,7 +754,7 @@ public class CNAB240 {
     buff.append("00000                                             00000     ");
     // Informação 12 128 226 99 - Alfa G101
     // ...Vencimento Data do Vencimento (Nominal) 128 135 Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // ...Valor Docum. Valor do Documento (Nominal) 136 150 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // ...Abatimento Valor do Abatimento 151 165 Num
@@ -854,7 +854,7 @@ public class CNAB240 {
     // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
     // Data do Pagamento 94-101 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // Tipo da Moeda 102 104 3 - Alfa
     buff.append("BRL");
     // Quantidade da Moeda 105 119 10 5 Num
@@ -915,7 +915,7 @@ public class CNAB240 {
     buff.append("00000                                             00000     ");
     // Informação 12 128 226 99 - Alfa G101
     // ...Vencimento Data do Vencimento (Nominal) 128 135 Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // ...Valor Docum. Valor do Documento (Nominal) 136 150 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // ...Abatimento Valor do Abatimento 151 165 Num
@@ -1015,7 +1015,7 @@ public class CNAB240 {
     // Nº do Docum. Atribuído p/ Empresa 74 93 20 - Alfa [NÚMERO DO DOCUMENTO ATRIBUÍDO PELO SISTEMA PRA IDENTIFICAÇÃO NA REMESSA]
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", docID, 20));
     // Data do Pagamento 94-101 8 - Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // Tipo da Moeda 102 104 3 - Alfa
     buff.append("BRL");
     // Quantidade da Moeda 105 119 10 5 Num
@@ -1076,7 +1076,7 @@ public class CNAB240 {
     buff.append("00000                                             00000     ");
     // Informação 12 128 226 99 - Alfa G101
     // ...Vencimento Data do Vencimento (Nominal) 128 135 Num
-    buff.append(RUTypes.formatToddMMyyyy(dataPagamento));
+    buff.append(RUTypes.formatDateDayMonthYear(dataPagamento));
     // ...Valor Docum. Valor do Documento (Nominal) 136 150 Num
     buff.append(RUString.completeOrTruncateUntilLengthLeft("0", PreProcess.processBigDecimalToZeroIfNullOrNegative(valorPagamento).movePointRight(2).abs().toPlainString(), 15));
     // ...Abatimento Valor do Abatimento 151 165 Num
