@@ -4,15 +4,15 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 
 /**
- * Description: Representa um registro do segmento J, e pode incluir o conte˙do de segmentos secund·rios omo o J52 ou J52 para Pix..<br>
+ * Description: Representa um registro do segmento J, e pode incluir o conte√∫do de segmentos secund√°rios omo o J52 ou J52 para Pix..<br>
  *
- * @author Rodrigo Leit„o
+ * @author Rodrigo Leit√£o
  * @since (21 de fev. de 2025)
  */
 public class CNAB240RegisterJ implements CNAB240RegisterDetail {
 
   /**
-   * CÛdigo de Barras encontrado
+   * C√≥digo de Barras encontrado
    */
   private String barCode;
 
@@ -22,12 +22,12 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   private String dataVencimento;
 
   /**
-   * Nome do Benefici·rio do Boleto
+   * Nome do Benefici√°rio do Boleto
    */
   private String beneficiarioNome;
 
   /**
-   * Valor do TÌtulo
+   * Valor do T√≠tulo
    */
   private String valorTitulo;
 
@@ -52,52 +52,52 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   private String valorPagamento;
 
   /**
-   * N˙mero do documento atribuÌdo pelo sistema pra identificaÁ„o na remessa
+   * N√∫mero do documento atribu√≠do pelo sistema pra identifica√ß√£o na remessa
    */
   private String docID;
 
   /**
-   * N˙mero do documento atributÌdo pelo banco.
+   * N√∫mero do documento atribut√≠do pelo banco.
    */
   private String bankDocID;
 
   /**
-   * CÛdigos de Ocorrencias de retorno
+   * C√≥digos de Ocorrencias de retorno
    */
   private String ocorrencias;
 
   /**
-   * Tipo de InstriÁ„o do benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * Tipo de Instri√ß√£o do benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    */
   private String beneficiarioTipoInscricao;
 
   /**
-   * N˙mero de InscriÁ„o do Benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * N√∫mero de Inscri√ß√£o do Benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    */
   private String beneficiarioNumeroInscricao;
 
   /**
    * Cria um novo objeto a partir da do registro.<br>
-   * Nos registros compostos mais de uma linha, chamar o mÈtodo {@link #addLine(String)}.
+   * Nos registros compostos mais de uma linha, chamar o m√©todo {@link #addLine(String)}.
    *
    * @throws RFWException
    *
    */
   public CNAB240RegisterJ(String line) throws RFWException {
-    // CÛdigo de Segmento no Reg. Detalhe 14 14 1 - Alfa 'J'
+    // C√≥digo de Segmento no Reg. Detalhe 14 14 1 - Alfa 'J'
     if (!"J".equals(line.substring(13, 14))) {
       throw new RFWCriticalException("Este objeto espera registros do segmento J. Registro encontrado: '${0}'.", new String[] { line.substring(13, 14) });
     }
 
-    // CÛdigo de Barras 18 61 44 - Num
+    // C√≥digo de Barras 18 61 44 - Num
     this.barCode = line.substring(17, 61);
-    // Nome do Benefici·rio 62 91 30 - Alfa
+    // Nome do Benefici√°rio 62 91 30 - Alfa
     this.beneficiarioNome = line.substring(61, 91);
     // Data do Vencimento (Nominal) 92 99 8 - Num
     this.dataVencimento = line.substring(91, 99);
-    // Valor do TÌtulo (Nominal) 100 114 13 2 Num
+    // Valor do T√≠tulo (Nominal) 100 114 13 2 Num
     this.valorTitulo = line.substring(99, 114);
     // Valor do Desconto + Abatimento 115 129 13 2 Num
     this.valorDesconto = line.substring(114, 129);
@@ -107,11 +107,11 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
     this.dataPagamento = line.substring(144, 152);
     // Valor do Pagamento 153 167 13 2 Num
     this.valorPagamento = line.substring(152, 167);
-    // N∫ do Docto AtribuÌdo pela Empresa 183 202 20 - Alfa [N⁄MERO DO DOCUMENTO ATRIBUÕDO PELO SISTEMA PRA IDENTIFICA«√O NA REMESSA]
+    // N¬∫ do Docto Atribu√≠do pela Empresa 183 202 20 - Alfa [N√öMERO DO DOCUMENTO ATRIBU√çDO PELO SISTEMA PRA IDENTIFICA√á√ÉO NA REMESSA]
     this.docID = line.substring(182, 202);
-    // N∫ do Docto AtribuÌdo pelo Banco 203 222 20 - Alfa
+    // N¬∫ do Docto Atribu√≠do pelo Banco 203 222 20 - Alfa
     this.bankDocID = line.substring(202, 222);
-    // CÛdigos das OcorrÍncias p/ Retorno 231 240 10 - Alfa
+    // C√≥digos das Ocorr√™ncias p/ Retorno 231 240 10 - Alfa
     this.ocorrencias = line.substring(230, 240);
   }
 
@@ -120,32 +120,32 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
     if (!"J".equals(newSegmento)) {
       throw new RFWCriticalException("A linha adicional deve ser do mesmo segmento 'J' para ser adicionada ao registro. Segmento da linha adicional: '${0}'.", new String[] { newSegmento });
     }
-    // +IdentificaÁ„o Registro Opcional 18 19 2 - Num ì52î
+    // +Identifica√ß√£o Registro Opcional 18 19 2 - Num ¬ì52¬î
     String identificadorRegistro = line.substring(17, 19);
     if (!"52".equals(identificadorRegistro)) {
-      throw new RFWCriticalException("Para o segmento J È esperado o itendificador '52' na linha de registro adicional.");
+      throw new RFWCriticalException("Para o segmento J √© esperado o itendificador '52' na linha de registro adicional.");
     }
-    // Dados do Benefici·rio Tipo de InscriÁ„o 76 76 1 - Num
+    // Dados do Benefici√°rio Tipo de Inscri√ß√£o 76 76 1 - Num
     this.beneficiarioTipoInscricao = line.substring(75, 76);
-    // Dados do Benefici·rio N˙mero de InscriÁ„o 77 91 15 - Num
+    // Dados do Benefici√°rio N√∫mero de Inscri√ß√£o 77 91 15 - Num
     this.beneficiarioNumeroInscricao = line.substring(76, 91);
-    // Dados do Benefici·rio Nome 92 131 40 - Alfa
-    this.beneficiarioNome = line.substring(91, 131); // J· recuperado do registro principal, mas atualizado aqui
+    // Dados do Benefici√°rio Nome 92 131 40 - Alfa
+    this.beneficiarioNome = line.substring(91, 131); // J√° recuperado do registro principal, mas atualizado aqui
   }
 
   /**
-   * # cÛdigo de Barras encontrado.
+   * # c√≥digo de Barras encontrado.
    *
-   * @return the cÛdigo de Barras encontrado
+   * @return the c√≥digo de Barras encontrado
    */
   public String getBarCode() {
     return barCode;
   }
 
   /**
-   * # cÛdigo de Barras encontrado.
+   * # c√≥digo de Barras encontrado.
    *
-   * @param barCode the new cÛdigo de Barras encontrado
+   * @param barCode the new c√≥digo de Barras encontrado
    */
   public void setBarCode(String barCode) {
     this.barCode = barCode;
@@ -170,36 +170,36 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   }
 
   /**
-   * # nome do Benefici·rio do Boleto.
+   * # nome do Benefici√°rio do Boleto.
    *
-   * @return the nome do Benefici·rio do Boleto
+   * @return the nome do Benefici√°rio do Boleto
    */
   public String getBeneficiarioNome() {
     return beneficiarioNome;
   }
 
   /**
-   * # nome do Benefici·rio do Boleto.
+   * # nome do Benefici√°rio do Boleto.
    *
-   * @param beneficiarioNome the new nome do Benefici·rio do Boleto
+   * @param beneficiarioNome the new nome do Benefici√°rio do Boleto
    */
   public void setBeneficiarioNome(String beneficiarioNome) {
     this.beneficiarioNome = beneficiarioNome;
   }
 
   /**
-   * # valor do TÌtulo.
+   * # valor do T√≠tulo.
    *
-   * @return the valor do TÌtulo
+   * @return the valor do T√≠tulo
    */
   public String getValorTitulo() {
     return valorTitulo;
   }
 
   /**
-   * # valor do TÌtulo.
+   * # valor do T√≠tulo.
    *
-   * @param valorTitulo the new valor do TÌtulo
+   * @param valorTitulo the new valor do T√≠tulo
    */
   public void setValorTitulo(String valorTitulo) {
     this.valorTitulo = valorTitulo;
@@ -278,16 +278,16 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   }
 
   /**
-   * # n˙mero do documento atribuÌdo pelo sistema pra identificaÁ„o na remessa.
+   * # n√∫mero do documento atribu√≠do pelo sistema pra identifica√ß√£o na remessa.
    *
-   * @return the n˙mero do documento atribuÌdo pelo sistema pra identificaÁ„o na remessa
+   * @return the n√∫mero do documento atribu√≠do pelo sistema pra identifica√ß√£o na remessa
    */
   public String getDocID() {
     return docID;
   }
 
   /**
-   * Valor do mÈtodo {@link #getDocID()} transformado em Long.
+   * Valor do m√©todo {@link #getDocID()} transformado em Long.
    */
   public Long getDocIDasLong() {
     if (docID == null) return null;
@@ -295,27 +295,27 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   }
 
   /**
-   * # n˙mero do documento atribuÌdo pelo sistema pra identificaÁ„o na remessa.
+   * # n√∫mero do documento atribu√≠do pelo sistema pra identifica√ß√£o na remessa.
    *
-   * @param docID the new n˙mero do documento atribuÌdo pelo sistema pra identificaÁ„o na remessa
+   * @param docID the new n√∫mero do documento atribu√≠do pelo sistema pra identifica√ß√£o na remessa
    */
   public void setDocID(String docID) {
     this.docID = docID;
   }
 
   /**
-   * # cÛdigos de Ocorrencias de retorno.
+   * # c√≥digos de Ocorrencias de retorno.
    *
-   * @return the cÛdigos de Ocorrencias de retorno
+   * @return the c√≥digos de Ocorrencias de retorno
    */
   public String getOcorrencias() {
     return ocorrencias;
   }
 
   /**
-   * Recupera o valor do mÈtodo {@link #getOcorrencias()} e quebra em um SetList com os cÛdigos de duas em duas letras.
+   * Recupera o valor do m√©todo {@link #getOcorrencias()} e quebra em um SetList com os c√≥digos de duas em duas letras.
    *
-   * @return the cÛdigos de Ocorrencias de retorno
+   * @return the c√≥digos de Ocorrencias de retorno
    */
   public String[] getOcorrenciasAsArray() {
     if (this.ocorrencias == null) return null;
@@ -323,67 +323,67 @@ public class CNAB240RegisterJ implements CNAB240RegisterDetail {
   }
 
   /**
-   * # cÛdigos de Ocorrencias de retorno.
+   * # c√≥digos de Ocorrencias de retorno.
    *
-   * @param ocorrencias the new cÛdigos de Ocorrencias de retorno
+   * @param ocorrencias the new c√≥digos de Ocorrencias de retorno
    */
   public void setOcorrencias(String ocorrencias) {
     this.ocorrencias = ocorrencias;
   }
 
   /**
-   * # tipo de InstriÁ„o do benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * # tipo de Instri√ß√£o do benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    *
-   * @return the tipo de InstriÁ„o do benefici·rio
+   * @return the tipo de Instri√ß√£o do benefici√°rio
    */
   public String getBeneficiarioTipoInscricao() {
     return beneficiarioTipoInscricao;
   }
 
   /**
-   * # tipo de InstriÁ„o do benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * # tipo de Instri√ß√£o do benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    *
-   * @param beneficiarioTipoInscricao the new tipo de InstriÁ„o do benefici·rio
+   * @param beneficiarioTipoInscricao the new tipo de Instri√ß√£o do benefici√°rio
    */
   public void setBeneficiarioTipoInscricao(String beneficiarioTipoInscricao) {
     this.beneficiarioTipoInscricao = beneficiarioTipoInscricao;
   }
 
   /**
-   * # n˙mero de InscriÁ„o do Benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * # n√∫mero de Inscri√ß√£o do Benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    *
-   * @return the n˙mero de InscriÁ„o do Benefici·rio
+   * @return the n√∫mero de Inscri√ß√£o do Benefici√°rio
    */
   public String getBeneficiarioNumeroInscricao() {
     return beneficiarioNumeroInscricao;
   }
 
   /**
-   * # n˙mero de InscriÁ„o do Benefici·rio.<br>
-   * ExtraÌdo do registro J52.
+   * # n√∫mero de Inscri√ß√£o do Benefici√°rio.<br>
+   * Extra√≠do do registro J52.
    *
-   * @param beneficiarioNumeroInscricao the new n˙mero de InscriÁ„o do Benefici·rio
+   * @param beneficiarioNumeroInscricao the new n√∫mero de Inscri√ß√£o do Benefici√°rio
    */
   public void setBeneficiarioNumeroInscricao(String beneficiarioNumeroInscricao) {
     this.beneficiarioNumeroInscricao = beneficiarioNumeroInscricao;
   }
 
   /**
-   * # n˙mero do documento atributÌdo pelo banco.
+   * # n√∫mero do documento atribut√≠do pelo banco.
    *
-   * @return the n˙mero do documento atributÌdo pelo banco
+   * @return the n√∫mero do documento atribut√≠do pelo banco
    */
   public String getBankDocID() {
     return bankDocID;
   }
 
   /**
-   * # n˙mero do documento atributÌdo pelo banco.
+   * # n√∫mero do documento atribut√≠do pelo banco.
    *
-   * @param bankDocID the new n˙mero do documento atributÌdo pelo banco
+   * @param bankDocID the new n√∫mero do documento atribut√≠do pelo banco
    */
   public void setBankDocID(String bankDocID) {
     this.bankDocID = bankDocID;

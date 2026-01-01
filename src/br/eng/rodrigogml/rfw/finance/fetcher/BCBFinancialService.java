@@ -19,17 +19,17 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 import br.eng.rodrigogml.rfw.kernel.logger.RFWLogger;
 
 /**
- * ServiÁo utilit·rio para busca de Ìndices financeiros diretamente da API do Banco Central do Brasil (BCB).
+ * Servi√ßo utilit√°rio para busca de √≠ndices financeiros diretamente da API do Banco Central do Brasil (BCB).
  *
- * Esta classe realiza o download das sÈries financeiras e converte os dados em objetos Java estruturados.
+ * Esta classe realiza o download das s√©ries financeiras e converte os dados em objetos Java estruturados.
  *
- * @author Rodrigo Leit„o
+ * @author Rodrigo Leit√£o
  * @since (28 de abr. de 2025)
  */
 public class BCBFinancialService {
 
   /**
-   * EnumeraÁ„o dos Ìndices financeiros disponÌveis para consulta no BCB.
+   * Enumera√ß√£o dos √≠ndices financeiros dispon√≠veis para consulta no BCB.
    */
   public static enum BCBFinancialIndex {
     DOLLAR_BUY(10813), DOLLAR_SELL(1), IPCA(433), POUPANCA_2012(196), SELIC_DAILY(11), SELIC_MONTHLY(4390);
@@ -49,22 +49,22 @@ public class BCBFinancialService {
   private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
   private BCBFinancialService() {
-    // Classe utilit·ria: n„o deve ser instanciada.
+    // Classe utilit√°ria: n√£o deve ser instanciada.
   }
 
   /**
-   * Realiza o download dos dados de uma sÈrie financeira em formato JSON.
+   * Realiza o download dos dados de uma s√©rie financeira em formato JSON.
    *
-   * @param index Õndice financeiro a ser consultado.
+   * @param index √çndice financeiro a ser consultado.
    * @param startDate Data inicial.
    * @param endDate Data final.
-   * @return String com o conte˙do JSON da resposta.
-   * @throws RFWException Em caso de erro na conex„o ou na leitura da resposta.
+   * @return String com o conte√∫do JSON da resposta.
+   * @throws RFWException Em caso de erro na conex√£o ou na leitura da resposta.
    */
   public static String downloadFinancialSeries(BCBFinancialIndex index, LocalDate startDate, LocalDate endDate) throws RFWException {
     String urlString = BASE_URL + index.getSeriesId() + "/dados?formato=json&dataInicial=" +
         startDate.format(DATE_FORMATTER) + "&dataFinal=" + endDate.format(DATE_FORMATTER);
-    RFWLogger.logInfo("Iniciando download da sÈrie: " + index.name());
+    RFWLogger.logInfo("Iniciando download da s√©rie: " + index.name());
 
     try {
       URL url = new URL(urlString);
@@ -81,7 +81,7 @@ public class BCBFinancialService {
       try (Scanner scanner = new Scanner(connection.getInputStream(), "UTF-8")) {
         scanner.useDelimiter("\\A");
         String result = scanner.hasNext() ? scanner.next() : "";
-        RFWLogger.logInfo("Download concluÌdo com sucesso para a sÈrie: " + index.name());
+        RFWLogger.logInfo("Download conclu√≠do com sucesso para a s√©rie: " + index.name());
         return result;
       }
     } catch (Exception e) {
@@ -91,7 +91,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie de compra do dÛlar.
+   * Busca e retorna os dados da s√©rie de compra do d√≥lar.
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -104,7 +104,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie de venda do dÛlar.
+   * Busca e retorna os dados da s√©rie de venda do d√≥lar.
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -117,7 +117,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie de IPCA (Õndice de PreÁos ao Consumidor Amplo).
+   * Busca e retorna os dados da s√©rie de IPCA (√çndice de Pre√ßos ao Consumidor Amplo).
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -130,7 +130,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie de rendimento da poupanÁa pÛs-2012.
+   * Busca e retorna os dados da s√©rie de rendimento da poupan√ßa p√≥s-2012.
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -143,7 +143,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie di·ria da taxa SELIC.
+   * Busca e retorna os dados da s√©rie di√°ria da taxa SELIC.
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -156,7 +156,7 @@ public class BCBFinancialService {
   }
 
   /**
-   * Busca e retorna os dados da sÈrie mensal da taxa SELIC.
+   * Busca e retorna os dados da s√©rie mensal da taxa SELIC.
    *
    * @param startDate Data inicial.
    * @param endDate Data final.
@@ -169,11 +169,11 @@ public class BCBFinancialService {
   }
 
   /**
-   * Realiza o parse do conte˙do JSON retornado pela API do BCB em uma lista de entradas financeiras.
+   * Realiza o parse do conte√∫do JSON retornado pela API do BCB em uma lista de entradas financeiras.
    *
    * @param json String no formato JSON contendo os dados financeiros.
    * @return Lista de FinancialIndexEntry.
-   * @throws RFWException Em caso de erro na convers„o do JSON.
+   * @throws RFWException Em caso de erro na convers√£o do JSON.
    */
   private static List<FinancialIndexEntry> parseFinancialIndexJson(String json) throws RFWException {
     List<FinancialIndexEntry> entries = new ArrayList<>();
