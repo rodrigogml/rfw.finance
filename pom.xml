@@ -7,6 +7,10 @@
 	<version>1.0</version>
 	<packaging>jar</packaging>
 	<name>RFW.Finance</name>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
@@ -30,6 +34,7 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.6.1</version>
 				<configuration>
+					<encoding>${project.build.sourceEncoding}</encoding>
 					<target>1.8</target>
 					<source>1.8</source>
 					<!--					<release>20</release>-->

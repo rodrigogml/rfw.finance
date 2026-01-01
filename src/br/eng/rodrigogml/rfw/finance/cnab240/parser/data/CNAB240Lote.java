@@ -7,9 +7,9 @@ import br.eng.rodrigogml.rfw.finance.cnab240.writer.CNAB240.TipoLote;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWCriticalException;
 
 /**
- * Description: Representa um lote do arquivo CNAB240. Mantém os dados do Header do Lote e contém as estruturas necessárias para armazenas a coleção de registros filhos.
+ * Description: Representa um lote do arquivo CNAB240. MantÃ©m os dados do Header do Lote e contÃ©m as estruturas necessÃ¡rias para armazenas a coleÃ§Ã£o de registros filhos.
  *
- * @author Rodrigo Leitão
+ * @author Rodrigo LeitÃ£o
  * @since (21 de fev. de 2025)
  */
 public class CNAB240Lote {
@@ -17,18 +17,18 @@ public class CNAB240Lote {
   private TipoLote tipoLote = null;
 
   /**
-   * Número do lote em relação ao arquivo.<br>
-   * Este valor é incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "índice" na hash e posteriormente no arquivo.
+   * NÃºmero do lote em relaÃ§Ã£o ao arquivo.<br>
+   * Este valor Ã© incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "Ã­ndice" na hash e posteriormente no arquivo.
    */
   private int numeroLote = -1;
 
   /**
-   * Tipo do Serviço de acordo com a tabela do campo.
+   * Tipo do ServiÃ§o de acordo com a tabela do campo.
    */
   private String tipoServico;
 
   /**
-   * Forma de lançamento de acordo com a tabela do campo.
+   * Forma de lanÃ§amento de acordo com a tabela do campo.
    */
   private String formaLancamento;
 
@@ -40,9 +40,9 @@ public class CNAB240Lote {
   /**
    * P014 Indicativo de Forma de Pagamento<br>
    * Possibilitar ao Pagador, mediante acordo com o seu Banco de Relacionamento, a forma de pagamento do compromisso.<Br>
-   * <li>01 - Débito em Conta Corrente
-   * <li>02 – Débito Empréstimo/Financiamento
-   * <li>03 – Débito Cartão de Crédito
+   * <li>01 - DÃ©bito em Conta Corrente
+   * <li>02 Â– DÃ©bito EmprÃ©stimo/Financiamento
+   * <li>03 Â– DÃ©bito CartÃ£o de CrÃ©dito
    */
   private String indicativoFormaPagamento = null;
 
@@ -55,48 +55,48 @@ public class CNAB240Lote {
    * @throws RFWCriticalException
    */
   public CNAB240Lote(String line) throws RFWCriticalException {
-    // Lote de Serviço 4 7 4 - Num
+    // Lote de ServiÃ§o 4 7 4 - Num
     this.numeroLote = Integer.parseInt(line.substring(3, 7));
-    // Tipo do Serviço 10 11 2 - Num
+    // Tipo do ServiÃ§o 10 11 2 - Num
     // ...'20' = Pagamento Fornecedor
-    // ...'30' = Pagamento Salários
+    // ...'30' = Pagamento SalÃ¡rios
     // ...'98' = Pagamentos Diversos
     this.tipoServico = line.substring(9, 11);
-    // Forma Lançamento Forma de Lançamento 12 13 2 - Num
-    // ...'01' = Crédito em Conta Corrente/Salário
-    // ...'11' = Pagamento de Contas e Tributos com Código de Barras
-    // ...'30' = Liquidação de Títulos do Próprio Banco
-    // ...'31' = Pagamento de Títulos de Outros Bancos
+    // Forma LanÃ§amento Forma de LanÃ§amento 12 13 2 - Num
+    // ...'01' = CrÃ©dito em Conta Corrente/SalÃ¡rio
+    // ...'11' = Pagamento de Contas e Tributos com CÃ³digo de Barras
+    // ...'30' = LiquidaÃ§Ã£o de TÃ­tulos do PrÃ³prio Banco
+    // ...'31' = Pagamento de TÃ­tulos de Outros Bancos
     this.formaLancamento = line.substring(11, 13);
-    // Layout do Lote Nº da Versão do Layout do Lote 14 16 3 - Num '040'
+    // Layout do Lote NÂº da VersÃ£o do Layout do Lote 14 16 3 - Num '040'
     this.layout = line.substring(13, 16);
 
-    // Define o Tipo de Lote de acordo com a combinação encontrada entre 'Tipo do Serviço' e 'Forma Lançamento'
+    // Define o Tipo de Lote de acordo com a combinaÃ§Ã£o encontrada entre 'Tipo do ServiÃ§o' e 'Forma LanÃ§amento'
     if ("98".equals(this.tipoServico)) { // '98' = Pagamentos Diversos
-      if ("30".equals(this.formaLancamento)) { // '30' = Liquidação de Títulos do Próprio Banco
+      if ("30".equals(this.formaLancamento)) { // '30' = LiquidaÃ§Ã£o de TÃ­tulos do PrÃ³prio Banco
         this.tipoLote = TipoLote.TITULODECOBRANCA_MESMOBANCO;
-      } else if ("31".equals(this.formaLancamento)) { // '31' = Pagamento de Títulos de Outros Bancos
+      } else if ("31".equals(this.formaLancamento)) { // '31' = Pagamento de TÃ­tulos de Outros Bancos
         this.tipoLote = TipoLote.TITULODECOBRANCA_OUTROSBANCOS;
-      } else if ("11".equals(this.formaLancamento)) { // '11' = Pagamento de Contas e Tributos com Código de Barras
+      } else if ("11".equals(this.formaLancamento)) { // '11' = Pagamento de Contas e Tributos com CÃ³digo de Barras
         this.tipoLote = TipoLote.GUIASSERVICO;
       }
-    } else if ("20".equals(this.tipoServico)) { // '20' = Pagamento Fornecedor / Crédito em conta (no BTG pode ser pagamento de Salário)
-      if ("01".equals(this.formaLancamento)) { // '01' = Crédito em Conta Corrente/Salário
+    } else if ("20".equals(this.tipoServico)) { // '20' = Pagamento Fornecedor / CrÃ©dito em conta (no BTG pode ser pagamento de SalÃ¡rio)
+      if ("01".equals(this.formaLancamento)) { // '01' = CrÃ©dito em Conta Corrente/SalÃ¡rio
         this.tipoLote = TipoLote.SALARIO;
       }
-    } else if ("30".equals(this.tipoServico)) { // '30' = Pagamento Salários
-      if ("01".equals(this.formaLancamento)) { // '01' = Crédito em Conta Corrente/Salário
+    } else if ("30".equals(this.tipoServico)) { // '30' = Pagamento SalÃ¡rios
+      if ("01".equals(this.formaLancamento)) { // '01' = CrÃ©dito em Conta Corrente/SalÃ¡rio
         this.tipoLote = TipoLote.SALARIO;
       }
     }
 
     if (this.tipoLote == null) {
-      throw new RFWCriticalException("Tipo de lote desconhecido para 'Tipo de Serviço = ${0}' e 'Forma de Lançamento = ${1}'.", new String[] { this.tipoServico, this.formaLancamento });
+      throw new RFWCriticalException("Tipo de lote desconhecido para 'Tipo de ServiÃ§o = ${0}' e 'Forma de LanÃ§amento = ${1}'.", new String[] { this.tipoServico, this.formaLancamento });
     }
 
     if (this.layout.equals("040")) {
     } else if (this.layout.equals("046")) {
-      // Indicativo da Forma de Pagamento do Serviço 223 224 2 - Num P
+      // Indicativo da Forma de Pagamento do ServiÃ§o 223 224 2 - Num P
       this.indicativoFormaPagamento = line.substring(222, 224);
     } else {
       throw new RFWCriticalException("Layout de Header de Lote desconhecido: '${0}'.", new String[] { this.layout });
@@ -122,56 +122,56 @@ public class CNAB240Lote {
   }
 
   /**
-   * # número do lote em relação ao arquivo.<br>
-   * Este valor é incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "índice" na hash e posteriormente no arquivo.
+   * # nÃºmero do lote em relaÃ§Ã£o ao arquivo.<br>
+   * Este valor Ã© incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "Ã­ndice" na hash e posteriormente no arquivo.
    *
-   * @return the número do lote em relação ao arquivo
+   * @return the nÃºmero do lote em relaÃ§Ã£o ao arquivo
    */
   public int getNumeroLote() {
     return numeroLote;
   }
 
   /**
-   * # número do lote em relação ao arquivo.<br>
-   * Este valor é incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "índice" na hash e posteriormente no arquivo.
+   * # nÃºmero do lote em relaÃ§Ã£o ao arquivo.<br>
+   * Este valor Ã© incrementado a cada lote novo criado e colocado na LinkedHashMap, refletindo seu "Ã­ndice" na hash e posteriormente no arquivo.
    *
-   * @param numeroLote the new número do lote em relação ao arquivo
+   * @param numeroLote the new nÃºmero do lote em relaÃ§Ã£o ao arquivo
    */
   public void setNumeroLote(int numeroLote) {
     this.numeroLote = numeroLote;
   }
 
   /**
-   * # tipo do Serviço de acordo com a tabela do campo.
+   * # tipo do ServiÃ§o de acordo com a tabela do campo.
    *
-   * @return the tipo do Serviço de acordo com a tabela do campo
+   * @return the tipo do ServiÃ§o de acordo com a tabela do campo
    */
   public String getTipoServico() {
     return tipoServico;
   }
 
   /**
-   * # tipo do Serviço de acordo com a tabela do campo.
+   * # tipo do ServiÃ§o de acordo com a tabela do campo.
    *
-   * @param tipoServico the new tipo do Serviço de acordo com a tabela do campo
+   * @param tipoServico the new tipo do ServiÃ§o de acordo com a tabela do campo
    */
   public void setTipoServico(String tipoServico) {
     this.tipoServico = tipoServico;
   }
 
   /**
-   * # forma de lançamento de acordo com a tabela do campo.
+   * # forma de lanÃ§amento de acordo com a tabela do campo.
    *
-   * @return the forma de lançamento de acordo com a tabela do campo
+   * @return the forma de lanÃ§amento de acordo com a tabela do campo
    */
   public String getFormaLancamento() {
     return formaLancamento;
   }
 
   /**
-   * # forma de lançamento de acordo com a tabela do campo.
+   * # forma de lanÃ§amento de acordo com a tabela do campo.
    *
-   * @param formaLancamento the new forma de lançamento de acordo com a tabela do campo
+   * @param formaLancamento the new forma de lanÃ§amento de acordo com a tabela do campo
    */
   public void setFormaLancamento(String formaLancamento) {
     this.formaLancamento = formaLancamento;
@@ -207,9 +207,9 @@ public class CNAB240Lote {
   /**
    * # p014 Indicativo de Forma de Pagamento<br>
    * Possibilitar ao Pagador, mediante acordo com o seu Banco de Relacionamento, a forma de pagamento do compromisso.<Br>
-   * <li>01 - Débito em Conta Corrente
-   * <li>02 – Débito Empréstimo/Financiamento
-   * <li>03 – Débito Cartão de Crédito.
+   * <li>01 - DÃ©bito em Conta Corrente
+   * <li>02 Â– DÃ©bito EmprÃ©stimo/Financiamento
+   * <li>03 Â– DÃ©bito CartÃ£o de CrÃ©dito.
    *
    * @return the p014 Indicativo de Forma de Pagamento<br>
    *         Possibilitar ao Pagador, mediante acordo com o seu Banco de Relacionamento, a forma de pagamento do compromisso
@@ -221,9 +221,9 @@ public class CNAB240Lote {
   /**
    * # p014 Indicativo de Forma de Pagamento<br>
    * Possibilitar ao Pagador, mediante acordo com o seu Banco de Relacionamento, a forma de pagamento do compromisso.<Br>
-   * <li>01 - Débito em Conta Corrente
-   * <li>02 – Débito Empréstimo/Financiamento
-   * <li>03 – Débito Cartão de Crédito.
+   * <li>01 - DÃ©bito em Conta Corrente
+   * <li>02 Â– DÃ©bito EmprÃ©stimo/Financiamento
+   * <li>03 Â– DÃ©bito CartÃ£o de CrÃ©dito.
    *
    * @param indicativoFormaPagamento the new p014 Indicativo de Forma de Pagamento<br>
    *          Possibilitar ao Pagador, mediante acordo com o seu Banco de Relacionamento, a forma de pagamento do compromisso

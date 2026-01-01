@@ -6,13 +6,13 @@ import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 /**
  * Description: Representa um registro do segmento O.<br>
  *
- * @author Rodrigo Leitão
+ * @author Rodrigo LeitÃ£o
  * @since (21 de fev. de 2025)
  */
 public class CNAB240RegisterO implements CNAB240RegisterDetail {
 
   /**
-   * Código de Barras encontrado
+   * CÃ³digo de Barras encontrado
    */
   private String barCode;
 
@@ -32,41 +32,41 @@ public class CNAB240RegisterO implements CNAB240RegisterDetail {
   private String valorPagamento;
 
   /**
-   * Número do documento atribuído pelo sistema pra identificação na remessa
+   * NÃºmero do documento atribuÃ­do pelo sistema pra identificaÃ§Ã£o na remessa
    */
   private String docID;
 
   /**
-   * Número do documento atributído pelo banco.
+   * NÃºmero do documento atributÃ­do pelo banco.
    */
   private String bankDocID;
 
   /**
-   * Códigos de Ocorrencias de retorno
+   * CÃ³digos de Ocorrencias de retorno
    */
   private String ocorrencias;
 
   /**
-   * Nome da concessionária ou do orgão público beneficiário do pagamento.
+   * Nome da concessionÃ¡ria ou do orgÃ£o pÃºblico beneficiÃ¡rio do pagamento.
    */
   private String concessionariaOrgaoPublico;
 
   /**
    * Cria um novo objeto a partir da do registro.<br>
-   * Nos registros compostos mais de uma linha, chamar o método {@link #addLine(String)}.
+   * Nos registros compostos mais de uma linha, chamar o mÃ©todo {@link #addLine(String)}.
    *
    * @throws RFWException
    *
    */
   public CNAB240RegisterO(String line) throws RFWException {
-    // Código de Segmento no Reg. Detalhe 14 14 1 - Alfa 'J'
+    // CÃ³digo de Segmento no Reg. Detalhe 14 14 1 - Alfa 'J'
     if (!"O".equals(line.substring(13, 14))) {
       throw new RFWCriticalException("Este objeto espera registros do segmento O. Registro encontrado: '${0}'.", new String[] { line.substring(13, 14) });
     }
 
-    // Código de Barras 18 61 44 - Alfa N001
+    // CÃ³digo de Barras 18 61 44 - Alfa N001
     this.barCode = line.substring(17, 61);
-    // Nome da Concessionária / Órgão Público 62 91 30 - Alfa G013
+    // Nome da ConcessionÃ¡ria / Ã“rgÃ£o PÃºblico 62 91 30 - Alfa G013
     this.concessionariaOrgaoPublico = line.substring(61, 91);
     // Data do Vencimento (Nominal) 92 99 8 - Num G044
     this.dataVencimento = line.substring(91, 99);
@@ -74,27 +74,27 @@ public class CNAB240RegisterO implements CNAB240RegisterDetail {
     this.dataPagamento = line.substring(99, 107);
     // Valor Pagamento Valor do Pagamento 108 122 13 2 Num P004
     this.valorPagamento = line.substring(107, 122);
-    // Seu número Nº do Docto Atribuído pela Empresa 123 142 20 Alfa G064
+    // Seu nÃºmero NÂº do Docto AtribuÃ­do pela Empresa 123 142 20 Alfa G064
     this.docID = line.substring(122, 142);
-    // Nosso Número Nº do Docto Atribuído pelo Banco 143 162 20 - Alfa G043
+    // Nosso NÃºmero NÂº do Docto AtribuÃ­do pelo Banco 143 162 20 - Alfa G043
     this.bankDocID = line.substring(142, 162);
-    // Códigos das Ocorrências p/ Retorno 231 240 10 - Alfa *G059
+    // CÃ³digos das OcorrÃªncias p/ Retorno 231 240 10 - Alfa *G059
     this.ocorrencias = line.substring(230, 240);
   }
 
   /**
-   * # código de Barras encontrado.
+   * # cÃ³digo de Barras encontrado.
    *
-   * @return the código de Barras encontrado
+   * @return the cÃ³digo de Barras encontrado
    */
   public String getBarCode() {
     return barCode;
   }
 
   /**
-   * # código de Barras encontrado.
+   * # cÃ³digo de Barras encontrado.
    *
-   * @param barCode the new código de Barras encontrado
+   * @param barCode the new cÃ³digo de Barras encontrado
    */
   public void setBarCode(String barCode) {
     this.barCode = barCode;
@@ -155,16 +155,16 @@ public class CNAB240RegisterO implements CNAB240RegisterDetail {
   }
 
   /**
-   * # número do documento atribuído pelo sistema pra identificação na remessa.
+   * # nÃºmero do documento atribuÃ­do pelo sistema pra identificaÃ§Ã£o na remessa.
    *
-   * @return the número do documento atribuído pelo sistema pra identificação na remessa
+   * @return the nÃºmero do documento atribuÃ­do pelo sistema pra identificaÃ§Ã£o na remessa
    */
   public String getDocID() {
     return docID;
   }
 
   /**
-   * Valor do método {@link #getDocID()} transformado em Long.
+   * Valor do mÃ©todo {@link #getDocID()} transformado em Long.
    *
    * @return the doc I das long
    */
@@ -174,27 +174,27 @@ public class CNAB240RegisterO implements CNAB240RegisterDetail {
   }
 
   /**
-   * # número do documento atribuído pelo sistema pra identificação na remessa.
+   * # nÃºmero do documento atribuÃ­do pelo sistema pra identificaÃ§Ã£o na remessa.
    *
-   * @param docID the new número do documento atribuído pelo sistema pra identificação na remessa
+   * @param docID the new nÃºmero do documento atribuÃ­do pelo sistema pra identificaÃ§Ã£o na remessa
    */
   public void setDocID(String docID) {
     this.docID = docID;
   }
 
   /**
-   * # códigos de Ocorrencias de retorno.
+   * # cÃ³digos de Ocorrencias de retorno.
    *
-   * @return the códigos de Ocorrencias de retorno
+   * @return the cÃ³digos de Ocorrencias de retorno
    */
   public String getOcorrencias() {
     return ocorrencias;
   }
 
   /**
-   * Recupera o valor do método {@link #getOcorrencias()} e quebra em um SetList com os códigos de duas em duas letras.
+   * Recupera o valor do mÃ©todo {@link #getOcorrencias()} e quebra em um SetList com os cÃ³digos de duas em duas letras.
    *
-   * @return the códigos de Ocorrencias de retorno
+   * @return the cÃ³digos de Ocorrencias de retorno
    */
   public String[] getOcorrenciasAsArray() {
     if (this.ocorrencias == null) return null;
@@ -202,45 +202,45 @@ public class CNAB240RegisterO implements CNAB240RegisterDetail {
   }
 
   /**
-   * # códigos de Ocorrencias de retorno.
+   * # cÃ³digos de Ocorrencias de retorno.
    *
-   * @param ocorrencias the new códigos de Ocorrencias de retorno
+   * @param ocorrencias the new cÃ³digos de Ocorrencias de retorno
    */
   public void setOcorrencias(String ocorrencias) {
     this.ocorrencias = ocorrencias;
   }
 
   /**
-   * # número do documento atributído pelo banco.
+   * # nÃºmero do documento atributÃ­do pelo banco.
    *
-   * @return the número do documento atributído pelo banco
+   * @return the nÃºmero do documento atributÃ­do pelo banco
    */
   public String getBankDocID() {
     return bankDocID;
   }
 
   /**
-   * # número do documento atributído pelo banco.
+   * # nÃºmero do documento atributÃ­do pelo banco.
    *
-   * @param bankDocID the new número do documento atributído pelo banco
+   * @param bankDocID the new nÃºmero do documento atributÃ­do pelo banco
    */
   public void setBankDocID(String bankDocID) {
     this.bankDocID = bankDocID;
   }
 
   /**
-   * # nome da concessionária ou do orgão público beneficiário do pagamento.
+   * # nome da concessionÃ¡ria ou do orgÃ£o pÃºblico beneficiÃ¡rio do pagamento.
    *
-   * @return the nome da concessionária ou do orgão público beneficiário do pagamento
+   * @return the nome da concessionÃ¡ria ou do orgÃ£o pÃºblico beneficiÃ¡rio do pagamento
    */
   public String getConcessionariaOrgaoPublico() {
     return concessionariaOrgaoPublico;
   }
 
   /**
-   * # nome da concessionária ou do orgão público beneficiário do pagamento.
+   * # nome da concessionÃ¡ria ou do orgÃ£o pÃºblico beneficiÃ¡rio do pagamento.
    *
-   * @param concessionariaOrgaoPublico the new nome da concessionária ou do orgão público beneficiário do pagamento
+   * @param concessionariaOrgaoPublico the new nome da concessionÃ¡ria ou do orgÃ£o pÃºblico beneficiÃ¡rio do pagamento
    */
   public void setConcessionariaOrgaoPublico(String concessionariaOrgaoPublico) {
     this.concessionariaOrgaoPublico = concessionariaOrgaoPublico;

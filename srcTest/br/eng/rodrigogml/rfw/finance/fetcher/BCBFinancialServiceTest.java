@@ -8,11 +8,11 @@ import org.junit.Test;
 import br.eng.rodrigogml.rfw.kernel.exceptions.RFWException;
 
 /**
- * Testes unit·rios para a classe BCBFinancialService. Testa o download e parse dos Ìndices financeiros do Banco Central.
+ * Testes unit√°rios para a classe BCBFinancialService. Testa o download e parse dos √≠ndices financeiros do Banco Central.
  *
- * AtenÁ„o: Este teste acessa serviÁos externos, depende da disponibilidade da API do BCB.
+ * Aten√ß√£o: Este teste acessa servi√ßos externos, depende da disponibilidade da API do BCB.
  * 
- * @author Rodrigo Leit„o
+ * @author Rodrigo Leit√£o
  * @since (29 de abr. de 2025)
  */
 public class BCBFinancialServiceTest {
@@ -46,7 +46,7 @@ public class BCBFinancialServiceTest {
     List<FinancialIndexEntry> series = BCBFinancialService.getPoupanca2012Series(
         LocalDate.of(2023, 1, 1),
         LocalDate.of(2023, 6, 1));
-    printSeries("PoupanÁa 2012", series);
+    printSeries("Poupan√ßa 2012", series);
   }
 
   @Test
@@ -54,7 +54,7 @@ public class BCBFinancialServiceTest {
     List<FinancialIndexEntry> series = BCBFinancialService.getSelicDailySeries(
         LocalDate.of(2023, 1, 1),
         LocalDate.of(2023, 6, 1));
-    printSeries("Selic Di·ria", series);
+    printSeries("Selic Di√°ria", series);
   }
 
   @Test
